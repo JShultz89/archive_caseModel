@@ -32,16 +32,14 @@ aInt.T = 22.5
 qw = 0.008 # Heat flow into water from Module Heat Receiver
 qa = 0.003 # Heat flow into air from Heat Loss from the Module
 # Define as token function
-Sa = lambda T: qa
-Sw = lambda T: qw
+Sa = lambda T: -qa
+Sw = lambda T: -qw
 
 
-n = 1
+n = 5
 # There are n modules, and n+1 "tube" regions
-water = []
-air = []
-water.append(w0)
-air.append(a0)
+water = [w0]
+air = [a0]
 
 for i in range(1,2*n+2):
 	# odd regions are "tube" regions
@@ -68,20 +66,24 @@ for i in range(1,2*n+2):
 	water[i].T = 15
 	air[i].mdot = a0.mdot
 	water[i].mdot = w0.mdot
-blocks = air[1::]+water[1::]
-T0 = [b.T for b in blocks]
 
-print T0
+# solvable blocks	
+blocks = air[1::]+water[1::]
+
+# define the residual function here as the sum over all non boundary blocks
 def residual(T):
 	b = air[1::]+water[1::]
 	for i in range(0,len(T)):
 		b[i].T = T[i]
 	return [block.r() for block in b]
 
-for b in blocks:
-	print b.name, b.T
+# print initial 
+# for b in blocks:
+# 	print b.name, b.T
 
-	fsolve(residual,T0)
+# solve it using whatever scipy decides we should use
+fsolve(residual, [b.T for b in blocks])
 
+# print final solution
 for b in blocks:
 	print b.name, b.T

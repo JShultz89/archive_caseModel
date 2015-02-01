@@ -14,7 +14,7 @@ class Block(object):
 		A list temperature (.T)
 		A list of sources (.S)
 	The equation for the block is
-	Sum(BCs) + Sum(Sources) = 0
+	Sum(Fluxes) + Sum(Sources) = 0
 
 	Each boundary condition connects a block
 	to another block (or analytic condition)

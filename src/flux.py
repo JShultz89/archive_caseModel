@@ -6,7 +6,13 @@ class Flux(object):
 	Flux object. Each flux is effectively a boundary condition
 
 	Each flux computes the heat transfer rate between two blocks
-	returns a Qdot
+	Each flux contains:
+		The left state (.L)
+		The right state (.R)
+		The type (.f)
+		The list of materials between the left and right state (.m)
+		The geometry between the left and right state (.G) 
+			with the areas .A precomputed
 
 	"""
 	def __init__(self,L,R,f,G=None):
@@ -34,10 +40,35 @@ class Flux(object):
 	"""
 
 	def cond(self,b):
+
+		"""
+		returns the convection heat transfer coefficient at a specific temperature
+
+		"""
+		def h(b):
+			
+			m = b.m
+			h = m.k(b.T)/self.G['cL']
+
+			if(m.name == 'water' and self.G['type'] == 'cyl'):
+				# Nu_D for Reynold numbers < 2300 (laminar) 
+				# and constant wall temperature. 
+				# Could use Nu_D = 4.36 for constant heat transfer.
+				h *= 3.66
+			elif(m.name == 'air' and self.G['type'] == 'cyl'):
+				Re = b.mdot/m.rho(b.T)*self.G['cL']/m.mu(b.T)	
+				h *= 0.037*Re**(4.0/5.0)*m.Pr(b.T)**(1.0/3.0)
+			elif(m.name == 'air' and self.G['type'] == 'plateLayer'):
+				Re = b.mdot/m.rho(b.T)*self.G['cL']/m.mu(b.T)
+				h *= 0.0296*Re**(4.0/5.0)*m.Pr(b.T)**(1.0/3.0)
+			elif(m.name == 'glass'):
+				pass
+		
+			return h		
 		# temperature doesnt matter in the layers, as the k are constant
-		Res = 1/(self.A[0]*self.h(self.L)) + \
+		Res = 1/(self.A[0]*h(self.L)) + \
 					np.dot([1/m.k() for m in self.m],[1/A for A in self.A[1:-1]]) + \
-					1/(self.A[-1]*self.h(self.R))
+					1/(self.A[-1]*h(self.R))
 		F = (self.R.T-self.L.T)/Res
 		if(b == self.R): return F
 		else: return -F
@@ -47,27 +78,3 @@ class Flux(object):
 		else: return -F
 
 	
-	"""
-	returns the convection heat transfer coefficient at a specific temperature
-
-	"""
-	def h(self,b):
-		
-		m = b.m
-		h = m.k(b.T)/self.G['cL']
-
-		if(m.name == 'water' and self.G['type'] == 'cyl'):
-			# Nu_D for Reynold numbers < 2300 (laminar) 
-			# and constant wall temperature. 
-			# Could use Nu_D = 4.36 for constant heat transfer.
-			h *= 3.66
-		elif(m.name == 'air' and self.G['type'] == 'cyl'):
-			Re = b.mdot/m.rho(b.T)*self.G['cL']/m.mu(b.T)	
-			h *= 0.037*Re**(4.0/5.0)*m.Pr(b.T)**(1.0/3.0)
-		elif(m.name == 'air' and self.G['type'] == 'plateLayer'):
-			Re = b.mdot/m.rho(b.T)*self.G['cL']/m.mu(b.T)
-			h *= 0.0296*Re**(4.0/5.0)*m.Pr(b.T)**(1.0/3.0)
-		elif(m.name == 'glass'):
-			pass
-	
-		return h		
