@@ -39,7 +39,7 @@ class Flux(object):
 	called by a block
 	"""
 
-	def heatcond(self,b):
+	def heatConduction(self,b):
 
 		"""
 		returns the convection heat transfer coefficient at a specific temperature
@@ -71,7 +71,7 @@ class Flux(object):
 		F = (self.R.var['T']-self.L.var['T'])/Res
 		if(b == self.R): return {'T':F}
 		else: return {'T':-F}
-	def heatconv(self,b):
+	def heatConvection(self,b):
 		F = b.mdot*b.m['Cp'](b.var)*(self.R.var['T']-self.L.var['T'])
 		if(b == self.R): return {'T':F}
 		else: return {'T':-F}

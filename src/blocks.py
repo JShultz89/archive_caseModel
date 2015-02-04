@@ -20,14 +20,12 @@ class Block(object):
 	to another block (or analytic condition)
 	"""
 
-	def __init__(self,s,m,vars):
+	def __init__(self,s,m):
 		self.F = []
+		self.S = []		
 		self.var = {}
-		self.varnames = vars
-		self.S = []
 		self.name = s
 		self.m = materials.__dict__[m]
-		self.mdot = []
 
 	def addFlux(self,F):
 		self.F.append(F)
@@ -41,6 +39,6 @@ class Block(object):
 	"""
 	def r(self):
 		res = {}
-		for var in self.varnames:
-			res[var] = sum([f.F(self)[var] for f in self.F]) - sum([S(self)[var] for S in self.S])
+		for v in self.var:
+			res[v] = sum([f.F(self)[v] for f in self.F]) - sum([S(self)[v] for S in self.S])
 		return res
