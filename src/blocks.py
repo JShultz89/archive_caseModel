@@ -1,4 +1,4 @@
-import materials
+import materials 
 from math import log, pi
 import numpy as np
 
@@ -11,7 +11,7 @@ class Block(object):
 	Each Block has:
 		A list of materials (.m)
 		A list of fluxes (.F)
-		A list temperature (.T)
+		A numpy array of variables (.var)
 		A list of sources (.S)
 	The equation for the block is
 	Sum(Fluxes) + Sum(Sources) = 0
@@ -20,14 +20,14 @@ class Block(object):
 	to another block (or analytic condition)
 	"""
 
-	def __init__(self,s,m):
+	def __init__(self,s,m,vars):
 		self.F = []
-		self.T = 0
+		self.var = {}
+		self.varnames = vars
 		self.S = []
 		self.name = s
-		self.m = materials.createMaterial(m)
+		self.m = materials.__dict__[m]
 		self.mdot = []
-
 
 	def addFlux(self,F):
 		self.F.append(F)
@@ -40,5 +40,7 @@ class Block(object):
 
 	"""
 	def r(self):
-		return sum([f.F(self) for f in self.F]) - sum([S(self.T) for S in self.S])
-		
+		res = {}
+		for var in self.varnames:
+			res[var] = sum([f.F(self)[var] for f in self.F]) - sum([S(self)[var] for S in self.S])
+		return res
