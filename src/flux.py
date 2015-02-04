@@ -69,11 +69,11 @@ class Flux(object):
 					np.dot([1/m['k']() for m in self.m],[1/A for A in self.A[1:-1]]) + \
 					1/(self.A[-1]*h(self.R))
 		F = (self.R.var['T']-self.L.var['T'])/Res
-		if(b == self.R): return F
-		else: return -F
+		if(b == self.R): return {'T':F}
+		else: return {'T':-F}
 	def heatconv(self,b):
 		F = b.mdot*b.m['Cp'](b.var)*(self.R.var['T']-self.L.var['T'])
-		if(b == self.R): return F
-		else: return -F
+		if(b == self.R): return {'T':F}
+		else: return {'T':-F}
 
 	

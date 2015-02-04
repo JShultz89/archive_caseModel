@@ -20,9 +20,10 @@ class Block(object):
 	to another block (or analytic condition)
 	"""
 
-	def __init__(self,s,m):
+	def __init__(self,s,m,vars):
 		self.F = []
 		self.var = {}
+		self.varnames = vars
 		self.S = []
 		self.name = s
 		self.m = materials.__dict__[m]
@@ -39,5 +40,7 @@ class Block(object):
 
 	"""
 	def r(self):
-		return sum([f.F(self) for f in self.F]) - sum([S(self) for S in self.S])
-		
+		res = {}
+		for var in self.varnames:
+			res[var] = sum([f.F(self)[var] for f in self.F]) - sum([S(self)[var] for S in self.S])
+		return res
