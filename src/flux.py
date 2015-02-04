@@ -32,14 +32,14 @@ class Flux(object):
 			elif(G['type'] == 'plate'):
 				self.A = np.ones(n)*G['w']*G['L']
 			for i in range(0,n-2):
-				self.m.append(materials.createMaterial(G['m'][i]))
+				self.m.append(eval('materials.'+G['m'][i]))
 	"""
 	Flux function
 
 	called by a block
 	"""
 
-	def cond(self,b):
+	def heatcond(self,b):
 
 		"""
 		returns the convection heat transfer coefficient at a specific temperature
@@ -48,32 +48,31 @@ class Flux(object):
 		def h(b):
 			
 			m = b.m
-			h = m.k(b.T)/self.G['cL']
-
-			if(m.name == 'water' and self.G['type'] == 'cyl'):
+			h = m['k'](b.var)/self.G['cL']
+			if(m['name'] == 'water' and self.G['type'] == 'cyl'):
 				# Nu_D for Reynold numbers < 2300 (laminar) 
 				# and constant wall temperature. 
 				# Could use Nu_D = 4.36 for constant heat transfer.
 				h *= 3.66
-			elif(m.name == 'air' and self.G['type'] == 'cyl'):
-				Re = b.mdot/m.rho(b.T)*self.G['cL']/m.mu(b.T)	
-				h *= 0.037*Re**(4.0/5.0)*m.Pr(b.T)**(1.0/3.0)
-			elif(m.name == 'air' and self.G['type'] == 'plateLayer'):
-				Re = b.mdot/m.rho(b.T)*self.G['cL']/m.mu(b.T)
-				h *= 0.0296*Re**(4.0/5.0)*m.Pr(b.T)**(1.0/3.0)
-			elif(m.name == 'glass'):
+			elif(m['name'] == 'air' and self.G['type'] == 'cyl'):
+				Re = b.mdot/m['rho'](b.var)*self.G['cL']/m['mu'](b.var)	
+				h *= 0.037*Re**(4.0/5.0)*m['Pr'](b.var)**(1.0/3.0)
+			elif(m['name'] == 'air' and self.G['type'] == 'plateLayer'):
+				Re = b.mdot/m['rho'](b.var)*self.G['cL']/m['mu'](b.var)
+				h *= 0.0296*Re**(4.0/5.0)*m['Pr'](b.var)**(1.0/3.0)
+			elif(m['name'] == 'glass'):
 				pass
 		
 			return h		
 		# temperature doesnt matter in the layers, as the k are constant
 		Res = 1/(self.A[0]*h(self.L)) + \
-					np.dot([1/m.k() for m in self.m],[1/A for A in self.A[1:-1]]) + \
+					np.dot([1/m['k']() for m in self.m],[1/A for A in self.A[1:-1]]) + \
 					1/(self.A[-1]*h(self.R))
-		F = (self.R.T-self.L.T)/Res
+		F = (self.R.var['T']-self.L.var['T'])/Res
 		if(b == self.R): return F
 		else: return -F
-	def conv(self,b):
-		F = b.mdot*b.m.Cp(b.T)*(self.R.T-self.L.T)
+	def heatconv(self,b):
+		F = b.mdot*b.m['Cp'](b.var)*(self.R.var['T']-self.L.var['T'])
 		if(b == self.R): return F
 		else: return -F
 
