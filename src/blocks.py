@@ -1,7 +1,7 @@
 import materials 
 from math import log, pi
 import numpy as np
-
+from collections import OrderedDict
 # Interface
 class Block(object):
 	""" 
@@ -23,7 +23,7 @@ class Block(object):
 	def __init__(self,s,m):
 		self.F = []
 		self.S = []		
-		self.var = {}
+		self.var = OrderedDict({})
 		self.name = s
 		self.m = materials.__dict__[m]
 

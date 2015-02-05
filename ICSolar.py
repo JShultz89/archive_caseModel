@@ -38,7 +38,7 @@ def Sw(b):
 	return {'T':-qw}
 
 
-n = 50
+n = 3
 # There are n modules, and n+1 "tube" regions
 water = [w0]
 air = [a0]
