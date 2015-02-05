@@ -32,3 +32,7 @@ class Problem(object):
 	def printSolution(self):
 		for b in self.b:
 			print b.name, b.var
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

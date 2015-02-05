@@ -1,3 +1,12 @@
+""" 
+This file contains a list of flux functions 
+
+This is meant to serve as a platform
+for all flux functions
+
+
+"""
+
 import materials 
 import numpy as np
 from math import pi,log 
@@ -77,3 +86,6 @@ class Flux(object):
 		else: return {'T':-F}
 
 	
+if __name__ == "__main__":
+	import doctest
+	doctest.testmod(extraglobs={'var': {'T': 20}})
