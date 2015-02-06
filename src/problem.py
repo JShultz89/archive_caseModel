@@ -1,38 +1,79 @@
+"""
+problem.py contains the Problem Class
+
+Each Problem has:
+	(.b) the blocks to solve for in the problem
+	(.mapping) the mapping between the local and global systems
+
+
+------------------------------------
+function tests are run by doctest
+python problem.py
+------------------------------------
+"""
 from scipy.optimize import fsolve
 
-"""
-
-
-"""
 class Problem(object):
+	""" 
+	Problem Class
 
+	__init__:		Problem Constructor
+
+	input(s):   (blocks) relevant blocks
+	output(s):	None
+	"""
 	def __init__(self,blocks):
 		self.b = blocks
-		# Store the mapping, to be used later
-		self.mapping = [(i, k) for i, b in enumerate(blocks) for k in b.var.keys()]
+		self.mapping = [(i, k) for i, b in enumerate(blocks) for k in b.state.keys()]
 
-	# update the variables in each block
+	"""
+	update:			Updates the blocks by unwrapping the new solution
+
+	input(s):   (solution) global array of floats corresponding to mapping
+	output(s):	None
+	"""
+
 	def update(self,solution):
 		for ix, (i,k) in enumerate(self.mapping):
-			self.b[i].var[k] = solution[ix]
+			self.b[i].state[k] = solution[ix]
 
-	# define the residual function here as the sum over all non boundary blocks
+	"""
+	r:					Global residual function r(solution) 
+
+	input(s):   (solution) global array of floats corresponding to mapping
+	output(s):	R(solution) global array of floats corresponding to residual
+
+	updates solution first, then computes
+	should be passed into another function
+	"""
 	def r(self,solution):
 
 		self.update(solution)
-		# compute the residual
-		return [self.b[i].r()[v] for i,v in self.mapping]
+		return [self.b[i].R()[v] for i,v in self.mapping]
 
-	# for now uses scipy.optimize's fsolve, does not compute
+	"""
+	solve:			wrapper for chosen (non)linear solver
+
+	input(s):   None
+	output(s):	None
+
+	unwraps blocks, passes into solver, finishes by updating blocks one last time
+	"""
 	def solve(self):
-		return fsolve(self.r, [b.var[v] for b in self.b for v in b.var])
+		solution = [None]*len(self.mapping)
+		for ix, (i,k) in enumerate(self.mapping):
+			solution[ix] = self.b[i].state[k]
+		solution = fsolve(self.r, solution)
+		self.update(solution)
 
-
-	# print final solution
+	"""
+	printSolution:		Outputs solution to screen
+	"""
 	def printSolution(self):
 		for b in self.b:
-			print b.name, b.var
+			print b.name, [s + '=' + str(b.state[s]) for s in b.state]
 
 if __name__ == "__main__":
     import doctest
-    doctest.testmod()
+    doctest.testmod(extraglobs={'b': {'T': 20}})
+

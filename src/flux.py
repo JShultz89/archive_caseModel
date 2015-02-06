@@ -1,9 +1,26 @@
 """ 
-This file contains a list of flux functions 
+flux.py contains a list of flux functions 
 
 This is meant to serve as a platform
 for all flux functions
 
+Each flux computes the heat transfer rate between two blocks
+Each flux contains:
+	The left state (.L)
+	The right state (.R)
+	The type (.f)
+	The list of materials between the left and right state (.m)
+	The geometry between the left and right state (.G) 
+		with the areas .A precomputed
+
+Should we have a state dependent material inside a flux,
+ie if glass properties depended on temperature
+then glass should be a block itself
+
+------------------------------------
+function tests are run by doctest
+python flux.py
+------------------------------------
 
 """
 
@@ -14,21 +31,22 @@ class Flux(object):
 	"""
 	Flux object. Each flux is effectively a boundary condition
 
-	Each flux computes the heat transfer rate between two blocks
-	Each flux contains:
-		The left state (.L)
-		The right state (.R)
-		The type (.f)
-		The list of materials between the left and right state (.m)
-		The geometry between the left and right state (.G) 
-			with the areas .A precomputed
+	__init__:		Flux Constructor
 
+	input(s):   (L) Left block
+							(R) Right block
+							(f) Flux function name
+							(G) Geometry (optional)
+								For now, geometry is not required, 
+								as some fluxes don't need it
+	output(s):	None
 	"""
 	def __init__(self,L,R,f,G=None):
 		self.L = L
 		self.R = R
 		self.F = eval('self.'+f) # set up the function
 		self.m = []
+		
 		if G is not None:
 			self.G = G
 			n = len(G['m'])+2 # number of layers + both sides
@@ -42,10 +60,21 @@ class Flux(object):
 				self.A = np.ones(n)*G['w']*G['L']
 			for i in range(0,n-2):
 				self.m.append(eval('materials.'+G['m'][i]))
-	"""
-	Flux function
 
-	called by a block
+	"""
+	The following are all flux function choices defined with
+
+	input(s):   (b) (must be left or right block)
+	output(s):	dict with entries for the flux for each state contributed to
+
+	Fluxes can have blocks with different physical states
+	provided the flux function passes contributions to some of the states
+
+	For example, L.state could have 'T','rho' and R.state could have just 'T'
+	as long as the flux between them only affects 'T'
+
+
+	The bulk of the hard-coding and material calls are in here
 	"""
 
 	def heatConduction(self,b):
@@ -57,18 +86,18 @@ class Flux(object):
 		def h(b):
 			
 			m = b.m
-			h = m['k'](b.var)/self.G['cL']
+			h = m['k'](b.state)/self.G['cL']
 			if(m['name'] == 'water' and self.G['type'] == 'cyl'):
 				# Nu_D for Reynold numbers < 2300 (laminar) 
 				# and constant wall temperature. 
 				# Could use Nu_D = 4.36 for constant heat transfer.
 				h *= 3.66
 			elif(m['name'] == 'air' and self.G['type'] == 'cyl'):
-				Re = b.mdot/m['rho'](b.var)*self.G['cL']/m['mu'](b.var)	
-				h *= 0.037*Re**(4.0/5.0)*m['Pr'](b.var)**(1.0/3.0)
+				Re = b.mdot/m['rho'](b.state)*self.G['cL']/m['mu'](b.state)	
+				h *= 0.037*Re**(4.0/5.0)*m['Pr'](b.state)**(1.0/3.0)
 			elif(m['name'] == 'air' and self.G['type'] == 'plateLayer'):
-				Re = b.mdot/m['rho'](b.var)*self.G['cL']/m['mu'](b.var)
-				h *= 0.0296*Re**(4.0/5.0)*m['Pr'](b.var)**(1.0/3.0)
+				Re = b.mdot/m['rho'](b.state)*self.G['cL']/m['mu'](b.state)
+				h *= 0.0296*Re**(4.0/5.0)*m['Pr'](b.state)**(1.0/3.0)
 			elif(m['name'] == 'glass'):
 				pass
 		
@@ -77,15 +106,17 @@ class Flux(object):
 		Res = 1/(self.A[0]*h(self.L)) + \
 					np.dot([1/m['k']() for m in self.m],[1/A for A in self.A[1:-1]]) + \
 					1/(self.A[-1]*h(self.R))
-		F = (self.R.var['T']-self.L.var['T'])/Res
+		F = (self.R.state['T']-self.L.state['T'])/Res
 		if(b == self.R): return {'T':F}
 		else: return {'T':-F}
+
 	def heatConvection(self,b):
-		F = b.mdot*b.m['Cp'](b.var)*(self.R.var['T']-self.L.var['T'])
+		F = b.mdot*b.m['Cp'](b.state)*(self.R.state['T']-self.L.state['T'])
 		if(b == self.R): return {'T':F}
 		else: return {'T':-F}
 
 	
 if __name__ == "__main__":
 	import doctest
-	doctest.testmod(extraglobs={'var': {'T': 20}})
+	doctest.testmod()
+
