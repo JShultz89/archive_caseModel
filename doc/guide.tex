@@ -1,0 +1,93 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[top=60pt, bottom=60pt, left=70pt, right=70pt]{geometry}
+
+% Default fixed font does not support bold face
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{10} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{10}  % for normal
+
+% Custom colors
+\usepackage{color}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\definecolor{commentgrey}{rgb}{0.5,0.5,0.5}
+\usepackage{listings}
+
+% Python style for highlighting
+\lstset{
+language=Python,
+basicstyle=\ttm,
+otherkeywords={self},             % Add keywords here
+keywordstyle=\ttb\color{deepblue},
+emph={MyClass,__init__},          % Custom highlighting
+emphstyle=\ttb\color{deepred},    % Custom highlighting style
+stringstyle=\color{deepgreen},
+frame=tb,                         % Any extra options here
+commentstyle=\color{commentsgrey}
+}
+
+
+\title{Code Documentation}
+\author{Daniel W. Zaide}
+
+\begin{document}
+
+\maketitle
+
+\section{Overview}
+
+This code was developed to model facade envelopes with several main objectives:
+\begin{itemize}
+\item Versatility - The code should be versatile, flexible, and handle a wide range of possible physics
+\item Simplicity - The code should be simple, and defining new components and physics should be easy and clean
+\item Readable - Outside of the infrastructure, the physics components and problem setup should be readable
+\end{itemize}
+
+With that in mind, we leverage python using \lstinline{list} and \lstinline{dict}, rather than numerical arrays to allow for flexibility. We also use function handles to allow for easy definition of functions and allow for runtime adding variables classes.
+
+\section{Infrastructure}
+The goal is ultimately to solve the global system
+\begin{equation}
+\mathbf{R}(\mathbf{U}) = \mathbf{0}
+\end{equation}
+for a set of states $\mathbf{U}$. At this time, solving is done without explicitly computing the $\frac{\partial \mathbf{R}}{\partial \mathbf{U}}$.
+
+\subsection{Blocks}
+Rather than a typical control volume approach, a simpler abstraction is used: \lstinline{blocks}. Each control volume can be considered as a block. Blocks are connected to other blocks through fluxes, which act as boundary conditions. Blocks can have arbitrary state variables, and not all blocks have to have the same set of states, provided flux functions are defined that connect them together. Every block is trying to solve its own local equation
+\begin{equation}
+R(B) = \sum_F F(B) + \sum_S(B) = 0
+\end{equation}
+for block $B$.
+\subsection{Fluxes}
+	Fluxes are defined through blocks which remain constant, such as external temperatures or inflow conditions. Each flux is a function of two blocks. Boundary conditions are currently defined by fluxes with one block constant.
+\subsection{Sources}
+	Sources are defined similar to fluxes, but are functions of a block. For now, only constant sources are defined.
+\subsection{Problem}
+This is a class that serves as a wrapper for everything, converting from the local block regions into a global matrix and back to do the solve.
+
+\section{Things that I'm aware of}
+\begin{enumerate}
+\item Blocks have no geometry associated with them.
+\item Runtime speed is not considered
+\item Conditioning of the system is not considered, with respect to block ordering in the global system.
+\item Fluxes are computed twice, once for each block.
+\end{enumerate}
+\end{document}
+
+% \section{``In-text'' listing highlighting}
+
+% \begin{lstlisting}
+% class MyClass(Yourclass):
+%     def __init__(self, my, yours):
+%         bla = '5 1 2 3 4'
+%         print bla
+% \end{lstlisting}
+
+% \section{External listing highlighting}
+
+% \lstinputlisting{../ICSolar.py}
+
+% \section{Inline highlighting}
+
+% Definition \lstinline{class MyClass} means \dots
