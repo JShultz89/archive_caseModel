@@ -75,5 +75,5 @@ class Problem(object):
 
 if __name__ == "__main__":
     import doctest
-    doctest.testmod(extraglobs={'b': {'T': 20}})
+    doctest.testmod()
 
