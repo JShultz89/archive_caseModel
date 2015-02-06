@@ -34,13 +34,15 @@ class Block(object):
 
 	def addSource(self,S):
 		self.S.append(S)
+
 	"""
 		iterates over sources and boundary conditions 
 		returns the sum as a single float variable
-
 	"""
 	def r(self):
 		res = {}
 		for var in self.varnames:
+			# res = sum of fluxes - sum of sources
+			# var = T (Temperature)
 			res[var] = sum([f.F(self)[var] for f in self.F]) - sum([S(self)[var] for S in self.S])
 		return res

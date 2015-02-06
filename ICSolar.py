@@ -7,21 +7,25 @@ from scipy.optimize import fsolve
 var = ['T']
 ################# Geometries
 # radius -> [inner, tubing, insulation]
-L = 0.3
-tubeGeom = {'type':'cyl','r':np.cumsum([3.0,1.675,9.525])*1e-3/2,'L':L,\
+L = 0.3 # Length or height of one volume (looking at facade)
+W = 0.3 # Width of 1 volume (looking at facade)
+tubeGeom = {'type':'cyl','r':np.cumsum([3.0,1.675,9.525])*1e-3/2.0,'L':L,\
 'cL':L,'m':['silicon_tubing','silicon_insulation']}
-windowGeom = {'type':'plate','w':0.3,'L':L,'cL':0.006,'m':['glass']}
-IGUGeom = {'type':'plate','w':0.3,'L':L,'cL':0.006,'m':['glass','argon','glass']}
+windowGeom = {'type':'plate','w':W,'L':L,'cL':0.006,'m':['glass']}
+IGUGeom = {'type':'plate','w':W,'L':L,'cL':0.006,'m':['glass','argon','glass']}
 
-# define inlet water
+# define inlet water temperature
 w0 = b.Block('water0','water',var)
 w0.var['T'] = 13
-# define inlet air
+# define inlet air temperature
 a0 = b.Block('air0','air',var)
 a0.var['T'] = 20
 
+# define inlet water flowrate
 w0.mdot = 8.5e-07*w0.m['rho'](w0.var)
+# define inlet air flowrate
 a0.mdot = 2.0*a0.m['rho'](a0.var)
+
 # define Exterior boundary condition
 aExt = b.Block('Exterior','air',var)
 aExt.var['T'] = 25.0
