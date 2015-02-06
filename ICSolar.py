@@ -5,15 +5,15 @@ where we our problem is similar to this
 
 					|-------|w|---||
 					|    5  |w|   ||
-					|  |\		|w|   ||
+					|  |\	|w|   ||
 					|  | \	|w|   ||
 					|--| 4|-|w|---||
 					|  | /	|w|   ||
 					|  |/   |w|   ||
 					|       |w|   ||
-exterior	|		 3 	|w|   ||  interior 
+		exterior	|	 3 	|w|   ||  interior 
 					|       |w|   ||
-					|  |\		|w|   ||
+					|  |\	|w|   ||
 					|  | \	|w|   ||
 					|--| 2|-|w|---||
 					|  | /	|w|   ||
@@ -35,28 +35,8 @@ from numpy import cumsum # this is used once in tube geometry
 
 """ Geometries used for fluxes """
 # radius -> [inner, tubing, insulation]
-<<<<<<< HEAD
-L = 0.3 # Length or height of one volume (looking at facade)
-W = 0.3 # Width of 1 volume (looking at facade)
-tubeGeom = {'type':'cyl','r':np.cumsum([3.0,1.675,9.525])*1e-3/2.0,'L':L,\
-'cL':L,'m':['silicon_tubing','silicon_insulation']}
-windowGeom = {'type':'plate','w':W,'L':L,'cL':0.006,'m':['glass']}
-IGUGeom = {'type':'plate','w':W,'L':L,'cL':0.006,'m':['glass','argon','glass']}
-
-# define inlet water temperature
-w0 = b.Block('water0','water',var)
-w0.var['T'] = 13
-# define inlet air temperature
-a0 = b.Block('air0','air',var)
-a0.var['T'] = 20
-
-# define inlet water flowrate
-w0.mdot = 8.5e-07*w0.m['rho'](w0.var)
-# define inlet air flowrate
-a0.mdot = 2.0*a0.m['rho'](a0.var)
-
-=======
 L = 0.3
+W = 0.3
 
 # this is the water tube geometry dictionary, consisting of two materials
 # and corresponding radii. 
@@ -64,10 +44,10 @@ tubeGeom = {'type':'cyl','r':cumsum([3.0,1.675,9.525])*1e-3/2,'L':L,\
 'cL':L,'m':['silicon_tubing','silicon_insulation']}
 
 # this is the outer window, which is a single layer of glass
-windowGeom = {'type':'plate','w':0.3,'L':L,'cL':0.006,'m':['glass']}
+windowGeom = {'type':'plate','w':W,'L':L,'cL':0.006,'m':['glass']}
 
 # this is the double layer window, glass, then argon, then glass
-IGUGeom = {'type':'plate','w':0.3,'L':L,'cL':0.006,'m':['glass','argon','glass']}
+IGUGeom = {'type':'plate','w':W,'L':L,'cL':0.006,'m':['glass','argon','glass']}
 
 
 """ Boundary flux blocks """
@@ -88,7 +68,6 @@ w0.mdot = 8.5e-07*w0.m['rho'](w0.state)
 a0.mdot = 2.0*a0.m['rho'](a0.state)
 
 # All these boundary blocks need are temperatures
->>>>>>> upstream/master
 # define Exterior boundary condition
 aExt = b.Block('Exterior','air')
 aExt.state['T'] = 25.0
@@ -110,7 +89,7 @@ Sw = s.Source('const',T = qw)
 """ Block Initialization """
 
 # Number of modules
-n = 3
+n = 2
 # Initial lists of blocks
 water = []
 air = []
