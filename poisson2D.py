@@ -16,8 +16,8 @@ import src.flux as f
 import src.problem as p
 import src.source as s
 
-if __name__ == '__main__':
-	n = int(sys.argv[1])+2 # add two for the boundaries
+def poisson2D(N):
+	n = N+2 # add two for the boundaries
 	""" 
 	lets define a uniform square mesh on [0, 1] x [0, 1]
 	and create boundary blocks as we go,
@@ -25,7 +25,6 @@ if __name__ == '__main__':
 	"""
 	d = 1/float(n-2) # spacing, delta X
 	B = [b.Block('('+str(i*d-d/2)+','+str(j*d-d/2)+')',None,{'u':math.exp((i*d-d/2)*(j*d-d/2))}) for i in range(0,n) for j in range(0,n)]
-	# B = [b.Block('('+str(i*d-d/2)+','+str(j*d-d/2)+')',None,{'u':0}) for i in range(0,n) for j in range(0,n)]
 
 	# interior sources
 	# use the name to get the source values
@@ -49,6 +48,9 @@ if __name__ == '__main__':
 	P = p.Problem(intB)
 	P.solve()
 
-	finalError = math.sqrt(sum([(math.exp(eval(block.name)[0]*eval(block.name)[1])-block.state['u'])**2 for block in intB])/(n-2)/(n-2))
+	return math.sqrt(sum([(math.exp(eval(block.name)[0]*eval(block.name)[1])-block.state['u'])**2 for block in intB])/(n-2)/(n-2))
 
-	print finalError
+if __name__ == "__main__":
+	""
+	Error = [poisson2D(5),poisson2D(10),poisson2D(20)]
+	Rate = [-math.log(Error[0]-Error[1])/math.log(75),-math.log(Error[1]-Error[2])/math.log(300)]
