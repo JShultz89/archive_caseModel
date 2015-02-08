@@ -115,7 +115,13 @@ class Flux(object):
 		if(b == self.R): return {'T':F}
 		else: return {'T':-F}
 
-	
+	def difference(self,b):
+
+		if(b == self.L): 
+			return dict((s,(self.R.state[s]-self.L.state[s])/self.G['d']) for s in b.state)
+		else: return dict((s,(self.L.state[s]-self.R.state[s])/self.G['d']) for s in b.state)
+
+
 if __name__ == "__main__":
 	import doctest
 	doctest.testmod()

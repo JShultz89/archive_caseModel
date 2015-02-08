@@ -47,7 +47,6 @@ class Problem(object):
 	should be passed into another function
 	"""
 	def r(self,solution):
-
 		self.update(solution)
 		return [self.b[i].R()[v] for i,v in self.mapping]
 
@@ -63,6 +62,8 @@ class Problem(object):
 		solution = [None]*len(self.mapping)
 		for ix, (i,k) in enumerate(self.mapping):
 			solution[ix] = self.b[i].state[k]
+			# print self.b[i].state[k], self.b[i].name
+
 		solution = fsolve(self.r, solution)
 		self.update(solution)
 
