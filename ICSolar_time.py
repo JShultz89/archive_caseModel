@@ -149,3 +149,4 @@ for row in exp_data:
     ICSolar = p.Problem(air[1::]+water[1::])
     ICSolar.solve()
     ICSolar.printSolution()
+    ICSolar.writeSolution()

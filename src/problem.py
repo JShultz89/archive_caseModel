@@ -71,10 +71,15 @@ class Problem(object):
 	printSolution:		Outputs solution to screen
 	"""
 	def printSolution(self):
-		csvfilename = 'output_nov25.csv'
+		for b in self.b:
+		    print b.name, [s + '=' + str(b.state[s]) for s in b.state]
 
+        
+    def writeSolution(self):
+		csvfilename = 'output_nov25.csv'
 		csvfile = open(csvfilename, 'wb')
-		python_data = csv.DictReader(csvfile, delimiter=',')
+		python_data = csv.writer(csvfile)
+		
 		for b in self.b:
 			python_data.writerow([b.name, [s + '=' + str(b.state[s]) for s in b.state]])
 

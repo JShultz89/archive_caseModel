@@ -22,7 +22,7 @@ Each definition is a dictionary and has
 function tests are below as run by doctest
 python materials.py
 ------------------------------------
->>> state = {'T': 20}
+>>> state = {'T': 20,'rho':1}
 >>> water['rho'](state)
 997.774
 
