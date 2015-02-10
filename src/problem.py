@@ -12,6 +12,7 @@ python problem.py
 ------------------------------------
 """
 from scipy.optimize import fsolve
+import csv
 
 class Problem(object):
 	""" 
@@ -70,8 +71,12 @@ class Problem(object):
 	printSolution:		Outputs solution to screen
 	"""
 	def printSolution(self):
+		csvfilename = 'output_nov25.csv'
+
+		csvfile = open(csvfilename, 'wb')
+		python_data = csv.DictReader(csvfile, delimiter=',')
 		for b in self.b:
-			print b.name, [s + '=' + str(b.state[s]) for s in b.state]
+			python_data.writerow([b.name, [s + '=' + str(b.state[s]) for s in b.state]])
 
 if __name__ == "__main__":
     import doctest

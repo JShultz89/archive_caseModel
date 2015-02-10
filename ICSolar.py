@@ -56,6 +56,7 @@ IGUGeom = {'type':'plate','w':W,'L':L,'cL':0.006,'m':['glass','argon','glass']}
 w0 = b.Block('water0','water')
 # Set its initial state to be 13 degrees
 w0.state['T'] = 13
+
 # define inlet air
 a0 = b.Block('air0','air')
 # Set its initial state to be 13 degrees
@@ -80,8 +81,8 @@ aInt.state['T'] = 22.5
 # Here, constant sources are defined using the optional arguments
 # to pass in information about the source variable (Temperature)
 # and its value
-qw = 0.008 # Heat flow into water from Module Heat Receiver
-qa = 0.003 # Heat flow into air from Heat Loss from the Module
+qw = -0.008 # Heat flow into water from Module Heat Receiver
+qa = -0.003 # Heat flow into air from Heat Loss from the Module
 
 Sa = s.Source('const',T = qa)
 Sw = s.Source('const',T = qw)
@@ -89,7 +90,7 @@ Sw = s.Source('const',T = qw)
 """ Block Initialization """
 
 # Number of modules
-n = 2
+n = 1
 # Initial lists of blocks
 water = []
 air = []
