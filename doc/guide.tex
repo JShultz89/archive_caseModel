@@ -118,7 +118,7 @@ glass = \
 
 This is solved in the file \lstinline{poisson2D.py}. Consider the decoupled pair of Poisson's equations, $\nabla^2 \mathbf{U} = \mathbf{S}$, $\mathbf{U} = [u,v]^T$
 \begin{equation}
-\frac{\partial^2}{\partial x^2}\left[ \begin{array}{c} u \\ v \end{array}\right] + \frac{\partial^2}{\partial y^2}\left[ \begin{array}{c} u \\ v \end{array}\right] = \left[ \begin{array}{c} u \\ v \end{array}\right] = \left[ \begin{array}{c} u \\ v \end{array}\right] = \left[ \begin{array}{c} (x^2+y^2)e^{xy} \\ 4(x^2+y^2+1)e^{x^2+y^2}  \end{array}\right]
+\frac{\partial^2}{\partial x^2}\left[ \begin{array}{c} u \\ v \end{array}\right] + \frac{\partial^2}{\partial y^2}\left[ \begin{array}{c} u \\ v \end{array}\right]  = \left[ \begin{array}{c} (x^2+y^2)e^{xy} \\ 4(x^2+y^2+1)e^{x^2+y^2}  \end{array}\right]
 \end{equation}
 which has the exact solution $u = e^{xy}, v = e^{x^2+y^2}$. We will solve it using a finite volume method on a uniform grid of $[-1,1]\times[-1,1]$ with $\Delta x = \Delta y = \Delta$, with variables stored on the center of the grid. For a grid with $N$ interior cells, we have the cell center as $(x,y)_{i,j} = (i\Delta-\Delta/2-1, j\Delta-\Delta/2-1)$
 \begin{figure}
