@@ -62,8 +62,6 @@ class Problem(object):
 		solution = [None]*len(self.mapping)
 		for ix, (i,k) in enumerate(self.mapping):
 			solution[ix] = self.b[i].state[k]
-			# print self.b[i].state[k], self.b[i].name
-
 		solution = fsolve(self.r, solution)
 		self.update(solution)
 

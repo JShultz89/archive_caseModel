@@ -36,13 +36,15 @@ class Block(object):
 
 	input(s):   (s) string corresponding to block name
 							(m) material
+							(states) Optional key-value pairs for
+								 			 initial conditions
 	output(s):	None
 	"""
 
-	def __init__(self,s,m,state = {}):
+	def __init__(self,s,m,**initialStates):
 		self.name = s
 		self.m = materials.__dict__.get(m,0)
-		self.state = OrderedDict(state)
+		self.state = OrderedDict(initialStates)
 		self.F = []
 		self.S = []	
 
@@ -59,6 +61,7 @@ class Block(object):
 	"""
 	def addFlux(self,F):
 		self.F.append(F)
+		F.B = self
 
 	def addSource(self,S):
 		self.S.append(S)
@@ -77,7 +80,7 @@ class Block(object):
 		# print reduce(lambda x, y: dict((k, v + y[k]) for k, v in x.iteritems()), \
 		# 	[F.F(self) for F in self.F] + [S.S(self) for S in self.S])
 		return reduce(lambda x, y: dict((k, v + y[k]) for k, v in x.iteritems()), \
-			[F.F(self) for F in self.F] + [S.S(self) for S in self.S])
+			[F.F() for F in self.F] + [S.S(self) for S in self.S])
 
 
 if __name__ == "__main__":
