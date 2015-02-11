@@ -70,7 +70,7 @@ R(U) = \sum_{(F,N)} F(U,N) + \sum_S S(U) = 0
 \end{equation}
 for block $B$, its states $U \in B$, and its connected neighboring blocks, $N$ and corresponding fluxes. In this framework the \lstinline{OrderedDict} structure is used to keep track of state variables. Each block can have its own set of states, provided there is an equation (flux or source) to be solved (R cannot be empty). The form of this will be a dictionary, and the sum of the fluxes and sources will be a sum over similar dictionaries, using some pythonization.
 \subsection{Fluxes}
-Fluxes are defined through blocks which remain constant, such as external temperatures or inflow conditions. Each flux is a function of two blocks, the block they belong to, and their neighboring block. Boundary conditions are currently defined by fluxes with one block not part of the problem (constant). The current definition is a bit strange, and its not clear where the flux should be currently implemented. Each flux function is defined in \lstinline{flux.py}, and is initialized by passing in the flux function name. Fluxes are one directional (from one block to another) and are assigned to a block, using the \lstinline{addFlux} function for a block. 
+Fluxes are defined through blocks which remain constant, such as external temperatures or inflow conditions. Each flux is a function of two blocks, the block they belong to, and their neighboring block. Boundary conditions are currently defined by fluxes with one block not part of the problem (constant). The current definition is a bit strange, and its not clear where the flux should be currently implemented. Each flux function is defined in \lstinline{flux.py}, and is initialized by passing in the flux function name. Fluxes are one directional (from one block to another) and are assigned to a block, using the \lstinline{addFlux} function for a block. Fluxes can also contain geometry and material information, passed in the form of a geometry dictionary.
 \subsection{Sources}
 Sources are defined similar to fluxes, but are functions of a block. For now, only constant sources are defined. They are defined in \lstinline{source.py}
 \subsection{Problem}
@@ -90,7 +90,28 @@ def solve(self):
 		self.update(solution)
 \end{lstlisting}
 This class is the one that needs the least work, the only places that should be modified are in \lstinline{solution = fsolve(self.r, solution)}, where \lstinline{fsolve} is a built-in function from \lstinline{scipy.optimize}.
-\section{Materials}
+\subsection{Materials}
+Materials are in \lstinline{materials.py}. They are stored as a dictionary of functions of state variables. Currently, only inline (lambda) functions are used, but external functions can be used as well. For example, air is defined as
+\begin{lstlisting}
+{
+	'name':'air',
+	'type':'gas',
+	'rho':lambda state : np.polyval([1.75e-05,-0.00483,1.293],state['T']),
+	'Cp': lambda state : np.polyval([1.005],state['T']),
+	'k':  lambda state : np.polyval([7e-05,0.0243],state['T']),
+	'Pr': lambda state : np.polyval([-4.705e-19,-0.0001,0.715],state['T']),
+	'mu': lambda state : np.polyval([7.5e-11,8.88e-08, 1.33e-05],state['T'])
+}
+\end{lstlisting}
+which has a set of polynomials defining the various properties as functions of temperature. For materials that only have constant properties (eg. glass), we have used \lstinline{state = 0} as the default\
+\begin{lstlisting}
+glass = \
+{
+	'name':'glass',
+	'type':'solid',
+	'k':  lambda state = 0: 1.05
+}
+\end{lstlisting}
 \section{Examples}
 
 \subsection{Poisson's Equation}
@@ -139,7 +160,8 @@ With the blocks initialized, the source functions can be initialized. In this ca
 \begin{lstlisting}
 for block in B:
 	(x,y) = eval(block.name)
-	block.addSource(s.Source('const',u = -(x*x+y*y)*math.exp(x*y),v = -4.0*(x*x+y*y+1.0)*math.exp(x*x+y*y)))
+	block.addSource(s.Source('const',u = -(x*x+y*y)*math.exp(x*y),
+		v = -4.0*(x*x+y*y+1.0)*math.exp(x*x+y*y)))
 \end{lstlisting}
 The source, defined in \lstinline{source.py}, is 
 \begin{lstlisting}

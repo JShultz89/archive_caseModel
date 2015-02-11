@@ -58,7 +58,7 @@ class Flux(object):
 			elif(G['type'] == 'plate'):
 				self.A = np.ones(n)*G['w']*G['L']
 			for i in range(0,n-2):
-				self.m.append(eval('materials.'+G['m'][i]))
+				self.m.append(materials.__dict__.get(G['m'][i],0))
 
 	"""
 	The following are all flux function choices defined with
