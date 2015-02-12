@@ -72,8 +72,8 @@ class Block(object):
 	sums over sources and fluxes to calculate the residual
 	"""
 	def R(self):
-	       print self.name
-	       print [F.F for F in self.F]
+	       # print self.name
+	       # print [F.F for F in self.F]
 	       return reduce(lambda x, y: dict((k, v + y[k]) for k, v in x.iteritems()), \
 			[F.F(self) for F in self.F] + [S.S(self) for S in self.S])
 

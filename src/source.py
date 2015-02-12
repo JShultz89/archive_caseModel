@@ -38,7 +38,7 @@ class Source(object):
 		return dict([(state,self.kwargs[state]) for state in b.state])
 
 if __name__ == "__main__":
-  import doctest
-  import blocks
-  doctest.testmod()
+	import doctest
+	import blocks
+	doctest.testmod()
 

@@ -37,7 +37,7 @@ from numpy import cumsum # this is used once in tube geometry
 
 """ Geometries used for fluxes """
 # radius -> [inner, tubing, insulation]
-L = 0.3
+L = 0.3/2.0
 W = 0.3
 
 csvfilename = 'nov25.csv'

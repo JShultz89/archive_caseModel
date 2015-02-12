@@ -35,7 +35,7 @@ from numpy import cumsum # this is used once in tube geometry
 
 """ Geometries used for fluxes """
 # radius -> [inner, tubing, insulation]
-L = 0.3
+L = 0.3/2.0
 W = 0.3
 
 # this is the water tube geometry dictionary, consisting of two materials
@@ -81,8 +81,8 @@ aInt.state['T'] = 22.5
 # Here, constant sources are defined using the optional arguments
 # to pass in information about the source variable (Temperature)
 # and its value
-qw = -0.008 # Heat flow into water from Module Heat Receiver
-qa = -0.003 # Heat flow into air from Heat Loss from the Module
+qw = 0 # -0.008 # Heat flow into water from Module Heat Receiver
+qa = 0 # -0.003 # Heat flow into air from Heat Loss from the Module
 
 Sa = s.Source('const',T = qa)
 Sw = s.Source('const',T = qw)
