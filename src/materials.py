@@ -34,6 +34,18 @@ python materials.py
 
 """
 import numpy as np
+constWater = \
+{
+	'name':'constWater',
+	'type':'liquid',
+	'Cp': lambda state = 0 : 4.218
+}
+constAir = \
+{
+	'name':'constAir',
+	'type':'liquid',
+	'Cp': lambda state = 0 : 1.005
+}
 water = \
 {
 	'name':'water',

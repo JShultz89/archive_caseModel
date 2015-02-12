@@ -75,6 +75,16 @@ class Flux(object):
 
 	The bulk of the hard-coding and material calls are in here
 	"""
+	def heatCondEasy(self):
+		# cheat and define h different for each material		
+		if(self.G['type'] == 'ext'):
+			h = 50
+		if(self.G['type'] == 'int'):
+			h = 20
+		if(self.G['type'] == 'wa'):
+			h = 10
+		Res = 1.0/h;
+		return {'T':(self.N.state['T']-self.B.state['T'])/Res}
 
 	def heatConduction(self):
 
@@ -102,13 +112,15 @@ class Flux(object):
 		
 			return h		
 		# temperature doesnt matter in the layers, as the k are constant
+
 		Res = 1/(self.A[0]*h(self.B)) + \
 					np.dot([1/m['k']() for m in self.m],[1/A for A in self.A[1:-1]]) + \
 					1/(self.A[-1]*h(self.N))
+		# print np.array([A for A in self.A[1:-1]])
 		return {'T':(self.N.state['T']-self.B.state['T'])/Res}
 
 	def heatConvection(self):
-		return {'T':self.B.mdot*self.B.m['Cp'](self.B.state)*(self.N.state['T']-self.B.state['T'])}
+		return {'T':self.B.mdot*self.B.m['Cp'](self.B.state)*(self.B.state['T']-self.N.state['T'])}
 
 	def difference(self):
 		return dict((s,(self.N.state[s]-self.B.state[s])/self.G['d']) for s in self.B.state)

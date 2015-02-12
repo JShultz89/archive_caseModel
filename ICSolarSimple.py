@@ -39,15 +39,9 @@ L = 0.3
 
 # this is the water tube geometry dictionary, consisting of two materials
 # and corresponding radii. 
-tubeGeom = {'type':'cyl','r':cumsum([3.0,1.675,9.525])*1e-3/2,'L':L,\
-'cL':L,'m':['silicon_tubing','silicon_insulation']}
-
-# this is the outer window, which is a single layer of glass
-windowGeom = {'type':'plate','w':0.3,'L':L,'cL':0.006,'m':['glass']}
-
-# this is the double layer window, glass, then argon, then glass
-IGUGeom = {'type':'plate','w':0.3,'L':L,'cL':0.006,'m':['glass','argon','glass']}
-
+tubeGeom = {'type':'wa','m':[]}
+intGeom = {'type':'int','m':[]}
+extGeom = {'type':'ext','m':[]}
 
 """ Boundary flux blocks """
 """ All these blocks remain constant """
@@ -60,8 +54,8 @@ a0 = b.Block('air0','air',T = 20)
 # We will need mass flow rates for our fluxes, so initialize them here
 # These are added to the class object, and are not part of the
 # default block requirement
-w0.mdot = 8.5e-07*w0.m['rho'](w0.state)
-a0.mdot = 2.0*a0.m['rho'](a0.state)
+w0.mdot = 0.00005 
+a0.mdot = 0.005
 
 # All these boundary blocks need are temperatures
 # define Exterior boundary condition
@@ -74,58 +68,44 @@ aInt = b.Block('Interior','air',T = 22.5)
 # Here, constant sources are defined using the optional arguments
 # to pass in information about the source variable (Temperature)
 # and its value
-qw = -0.008 # Heat flow into water from Module Heat Receiver
-qa = -0.003 # Heat flow into air from Heat Loss from the Module
+qa = -0.008 # Heat flow into water from Module Heat Receiver
+qw = -0.003 # Heat flow into air from Heat Loss from the Module
 
 Sa = s.Source('const',T = qa)
 Sw = s.Source('const',T = qw)
 
 """ Block Initialization """
 
-# Number of modules
-n = 1
-# Initial lists of blocks
-water = []
-air = []
 
-# add in the inflow block to make it easy to connect blocks
-# These blocks are not used in the solve
-water.append(w0)
-air.append(a0)
+w1 = b.Block('water1','constWater',T=13)
+w2 = b.Block('water2','constWater',T=13)
+a1 = b.Block('air1','constAir',T=20)
+a2 = b.Block('air2','constAir',T=20)
 
-#### Initialize the blocks we will solve on
-for i in range(1,2*n):
-	# Every block is named for its material in this case
-	water.append(b.Block('water' + str(i),'water',T = 15))
-	air.append(b.Block('air' + str(i),'air',T = 22))
+w1.mdot = w0.mdot
+w2.mdot = w1.mdot
+a1.mdot = a0.mdot
+a2.mdot = a1.mdot
 
-	if(i % 2 == 1): # odd regions are "tube" regions
-		# Water tube has one flux for heat conduction
-		water[i].addFlux(f.Flux(air[i],'heatConduction',tubeGeom))
-		# Air has three, corresponding to the windows and the water-tube
-		# air[i].addFlux(f.Flux(water[i],'heatConduction',tubeGeom))
-		# air[i].addFlux(f.Flux(aInt,'heatConduction',IGUGeom))
-		# air[i].addFlux(f.Flux(aExt,'heatConduction',windowGeom))
-	else: # These are "module" region
-		water[i].addSource(Sw)
-		air[i].addSource(Sa)
+a2.addSource(Sa)
+w2.addSource(Sw)
 
-	# These are the connectivity between regions, each block takes heat
-	# from the block "below" it
-	air[i].addFlux(f.Flux(air[i-1],'heatConvection'))
-	water[i].addFlux(f.Flux(water[i-1],'heatConvection'))
+a1.addFlux(f.Flux(aExt,'heatCondEasy',extGeom))
+a1.addFlux(f.Flux(aInt,'heatCondEasy',intGeom))
+a1.addFlux(f.Flux(w1,'heatCondEasy',tubeGeom))
+a1.addFlux(f.Flux(a0,'heatConvection'))
+w1.addFlux(f.Flux(a1,'heatCondEasy',tubeGeom))
+w1.addFlux(f.Flux(w0,'heatConvection'))
 
-	# These are needed for window calculations
-	air[i].mdot = a0.mdot
-	water[i].mdot = w0.mdot
-#### END OF INITIALIZATION
+a2.addFlux(f.Flux(a1,'heatConvection'))
+w2.addFlux(f.Flux(w1,'heatConvection'))
+
+
 
 """ Problem Initialization """
 
 # Start the problem with solvable blocks, which
 # are all the blocks except the first two
-ICSolar = p.Problem(air[1::]+water[1::])
+ICSolar = p.Problem([a1,a2,w1,w2])
 ICSolar.solve()
-water[0].printMe()
-air[0].printMe()
 ICSolar.printSolution()

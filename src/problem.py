@@ -70,8 +70,7 @@ class Problem(object):
 	"""
 	def printSolution(self):
 		for b in self.b:
-			print b.name, [s + '=' + str(b.state[s]) for s in b.state]
-
+			b.printMe()
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
