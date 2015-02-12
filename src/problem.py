@@ -48,7 +48,6 @@ class Problem(object):
 	should be passed into another function
 	"""
 	def r(self,solution):
-
 		self.update(solution)
 		return [self.b[i].R()[v] for i,v in self.mapping]
 

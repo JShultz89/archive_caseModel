@@ -6,8 +6,8 @@ for all flux functions
 
 Each flux computes the heat transfer rate between two blocks
 Each flux contains:
-	The left state (.L)
-	The right state (.R)
+	The block it belongs to (.B)
+	The block its connected to (.N)
 	The type (.f)
 	The list of materials between the left and right state (.m)
 	The geometry between the left and right state (.G) 
@@ -33,17 +33,16 @@ class Flux(object):
 
 	__init__:		Flux Constructor
 
-	input(s):   (L) Left block
-							(R) Right block
+	input(s):   (N) Neighboring block
 							(f) Flux function name
 							(G) Geometry (optional)
 								For now, geometry is not required, 
 								as some fluxes don't need it
 	output(s):	None
 	"""
-	def __init__(self,L,R,f,G=None):
-		self.L = L
-		self.R = R
+	def __init__(self,N,f,G=None):
+		self.B = None # this will be set when its added to the block
+		self.N = N
 		self.F = eval('self.'+f) # set up the function
 		self.m = []
 		
@@ -59,12 +58,12 @@ class Flux(object):
 			elif(G['type'] == 'plate'):
 				self.A = np.ones(n)*G['w']*G['L']
 			for i in range(0,n-2):
-				self.m.append(eval('materials.'+G['m'][i]))
+				self.m.append(materials.__dict__.get(G['m'][i],0))
 
 	"""
 	The following are all flux function choices defined with
 
-	input(s):   (b) (must be left or right block)
+	input(s):   none
 	output(s):	dict with entries for the flux for each state contributed to
 
 	Fluxes can have blocks with different physical states
@@ -77,7 +76,7 @@ class Flux(object):
 	The bulk of the hard-coding and material calls are in here
 	"""
 
-	def heatConduction(self,b):
+	def heatConduction(self):
 
 		"""
 		returns the convection heat transfer coefficient at a specific temperature
@@ -85,37 +84,37 @@ class Flux(object):
 		"""
 		def h(b):
 			
-			m = b.m
-			h = m['k'](b.state)/self.G['cL']
+			m = self.B.m
+			h = m['k'](self.B.state)/self.G['cL']
 			if(m['name'] == 'water' and self.G['type'] == 'cyl'):
 				# Nu_D for Reynold numbers < 2300 (laminar) 
 				# and constant wall temperature. 
 				# Could use Nu_D = 4.36 for constant heat transfer.
 				h *= 3.66
 			elif(m['name'] == 'air' and self.G['type'] == 'cyl'):
-				Re = b.mdot/m['rho'](b.state)*self.G['cL']/m['mu'](b.state)	
-				h *= 0.037*Re**(4.0/5.0)*m['Pr'](b.state)**(1.0/3.0)
+				Re = self.B.mdot/m['rho'](self.B.state)*self.G['cL']/m['mu'](self.B.state)	
+				h *= 0.037*Re**(4.0/5.0)*m['Pr'](self.B.state)**(1.0/3.0)
 			elif(m['name'] == 'air' and self.G['type'] == 'plateLayer'):
-				Re = b.mdot/m['rho'](b.state)*self.G['cL']/m['mu'](b.state)
-				h *= 0.0296*Re**(4.0/5.0)*m['Pr'](b.state)**(1.0/3.0)
+				Re = self.B.mdot/m['rho'](self.B.state)*self.G['cL']/m['mu'](self.B.state)
+				h *= 0.0296*Re**(4.0/5.0)*m['Pr'](self.B.state)**(1.0/3.0)
 			elif(m['name'] == 'glass'):
 				pass
 		
 			return h		
 		# temperature doesnt matter in the layers, as the k are constant
-		Res = 1/(self.A[0]*h(self.L)) + \
+		Res = 1/(self.A[0]*h(self.B)) + \
 					np.dot([1/m['k']() for m in self.m],[1/A for A in self.A[1:-1]]) + \
-					1/(self.A[-1]*h(self.R))
-		F = (self.R.state['T']-self.L.state['T'])/Res
-		if(b == self.R): return {'T':F}
-		else: return {'T':-F}
+					1/(self.A[-1]*h(self.N))
+		return {'T':(self.N.state['T']-self.B.state['T'])/Res}
 
-	def heatConvection(self,b):
-		F = b.mdot*b.m['Cp'](b.state)*(self.R.state['T']-self.L.state['T'])
-		if(b == self.R): return {'T':F}
-		else: return {'T':-F}
+	def heatConvection(self):
+		return {'T':self.B.mdot*self.B.m['Cp'](self.B.state)*(self.N.state['T']-self.B.state['T'])}
 
-	
+	def difference(self):
+		return dict((s,(self.N.state[s]-self.B.state[s])/self.G['d']) for s in self.B.state)
+
+
+
 if __name__ == "__main__":
 	import doctest
 	doctest.testmod()
