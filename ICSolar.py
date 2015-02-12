@@ -35,7 +35,7 @@ from numpy import cumsum # this is used once in tube geometry
 
 """ Geometries used for fluxes """
 # radius -> [inner, tubing, insulation]
-L = 0.3/2.0
+L = 0.3
 W = 0.3
 
 # this is the water tube geometry dictionary, consisting of two materials
