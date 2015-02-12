@@ -1,0 +1,74 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[top=60pt, bottom=60pt, left=70pt, right=70pt]{geometry}
+\usepackage{graphicx}
+% Default fixed font does not support bold face
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{8} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{8}  % for normal
+
+% Custom colors
+\usepackage{color}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\definecolor{commentgrey}{rgb}{0.5,0.5,0.5}
+\usepackage{listings}
+
+% Python style for highlighting
+\lstset{
+language=Python,
+basicstyle=\ttm,
+otherkeywords={self},             % Add keywords here
+keywordstyle=\ttb\color{deepblue},
+emph={MyClass,__init__},          % Custom highlighting
+emphstyle=\ttb\color{deepred},    % Custom highlighting style
+stringstyle=\color{deepgreen},
+frame=tb,                         % Any extra options here
+commentstyle=\color{commentsgrey}
+}
+
+
+\title{ICSolar Model}
+\author{Daniel W. Zaide}
+
+\begin{document}
+
+\maketitle
+\section{Heat Conduction}
+\subsection{Through the Tube}
+For the pipe filled with water, we have
+\[ R_{total} = R_{conv,water} + R_{cyl,tube} + R_{cyl,ins} + R_{conv,air} \]
+\[ R_{total} = \frac{1}{2\pi r_{inner} Lh_{water}} + \frac{\ln r_{tube}/r_{inner}}{2\pi L k_{tube}} + \frac{\ln r_{ins}/r_{tube} }{2\pi L k_{ins}}+ \frac{1}{2\pi r_{ins} Lh_{air}}\]
+and 
+\[ \dot{Q} = \frac{T_{water}-T_{air}}{R_{total}} \]
+In your python code, you have
+\begin{lstlisting}
+R.R_cond_t = math.log((diameter_tubing)/(diameter_inside)) / 
+		(2 * math.pi * diameter_tubing * tubing_length * cond_tubing)    
+R.R_cond_ins = math.log((diameter_insulation)/(diameter_tubing)) / 
+		(2.0 * math.pi * diameter_insulation * tubing_length * cond_insulation)  
+\end{lstlisting}
+Which I believe have an extra diameter in the denominator, which is why both your matlab code and your python script give the different answer. Unless my theory is wrong, which it might be, but I have a copy of the thermodynamics book in front of me. My code does have errors in the fluxes, but theres a reason mine doesnt seem to do much, and its the differing of this large number.
+\subsection{Across a Plate}
+We have \[ R_{total} = \frac{1}{h_{air}A} + \frac{t_{plate}}{k_{plate}A} + \frac{1}{h_{interior}A} \] where $t_{plate}$ is the thickness of the glass, and $A$ is the surface area. Similarly,
+\[ \dot{Q} = \frac{T_{\mathrm{outside of plate}}-T_{air}}{R_{total}} \]
+This is correct in your code.
+
+\end{document}
+
+% \section{``In-text'' listing highlighting}
+
+% \begin{lstlisting}
+% class MyClass(Yourclass):
+%     def __init__(self, my, yours):
+%         bla = '5 1 2 3 4'
+%         print bla
+% \end{lstlisting}
+
+% \section{External listing highlighting}
+
+% \lstinputlisting{../ICSolar.py}
+
+% \section{Inline highlighting}
+
+% Definition \lstinline{class MyClass} means \dots

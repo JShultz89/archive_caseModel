@@ -97,7 +97,7 @@ water.append(w0)
 air.append(a0)
 
 #### Initialize the blocks we will solve on
-for i in range(1,2*n+2):
+for i in range(1,2*n):
 	# Every block is named for its material in this case
 	water.append(b.Block('water' + str(i),'water',T = 15))
 	air.append(b.Block('air' + str(i),'air',T = 22))
@@ -106,9 +106,9 @@ for i in range(1,2*n+2):
 		# Water tube has one flux for heat conduction
 		water[i].addFlux(f.Flux(air[i],'heatConduction',tubeGeom))
 		# Air has three, corresponding to the windows and the water-tube
-		air[i].addFlux(f.Flux(water[i],'heatConduction',tubeGeom))
-		air[i].addFlux(f.Flux(aInt,'heatConduction',IGUGeom))
-		air[i].addFlux(f.Flux(aExt,'heatConduction',windowGeom))
+		# air[i].addFlux(f.Flux(water[i],'heatConduction',tubeGeom))
+		# air[i].addFlux(f.Flux(aInt,'heatConduction',IGUGeom))
+		# air[i].addFlux(f.Flux(aExt,'heatConduction',windowGeom))
 	else: # These are "module" region
 		water[i].addSource(Sw)
 		air[i].addSource(Sa)
@@ -129,4 +129,6 @@ for i in range(1,2*n+2):
 # are all the blocks except the first two
 ICSolar = p.Problem(air[1::]+water[1::])
 ICSolar.solve()
+water[0].printMe()
+air[0].printMe()
 ICSolar.printSolution()

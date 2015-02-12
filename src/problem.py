@@ -71,15 +71,7 @@ class Problem(object):
 	"""
 	def printSolution(self):
 		for b in self.b:
-		    print b.name, [s + '=' + str(b.state[s]) for s in b.state]
-
-        
-        def writeSolution(self):
-           	csvfilename = 'output_nov25.csv'
-           	csvfile = open(csvfilename, 'wb')
-           	python_data = csv.writer(csvfile)
-           	for b in self.b:
-           	    python_data.writerow([b.name, [s + '=' + str(b.state[s]) for s in b.state]])
+			b.printMe()
 
 if __name__ == "__main__":
     import doctest
