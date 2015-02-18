@@ -49,14 +49,6 @@ class Flux(object):
 		if G is not None:
 			self.G = G
 			n = len(G['m'])+2 # number of layers + both sides
-			if(G['type'] == 'cyl'):
-				self.A = np.zeros(n)
-				self.A[0] = 2*pi*G['r'][0]*G['L']
-				for i in range(1,n-1): # b.Technically not an area
-					self.A[i] = (2*pi*G['L'])/log(G['r'][i]/G['r'][i-1])
-				self.A[n-1] = 2*pi*G['r'][n-2]*G['L']
-			elif(G['type'] == 'plate'):
-				self.A = np.ones(n)*G['w']*G['L']
 			for i in range(0,n-2):
 				self.m.append(materials.__dict__.get(G['m'][i],0))
 
@@ -76,16 +68,19 @@ class Flux(object):
 	The bulk of the hard-coding and material calls are in here
 	"""
 
-	def heatCondEasy(self):
-		# cheat and define h different for each material		
+	def heatCondSimple(self):
+	
+		# All per meter
 		if(self.G['type'] == 'ext'):
-			h = 11.0059962088
-		if(self.G['type'] == 'int'):
-			h = 10.7354320057
-		if(self.G['type'] == 'wa'):
-			h = 12.7423617458
-		Res = 1.0/h;
-		return {'T':(self.N.state['T']-self.B.state['T'])/Res}
+			h = 1.5583718700478653
+		elif(self.G['type'] == 'int'):
+			h = 0.5240370865137535
+		elif(self.G['type'] == 'wa'):
+			h = 0.16079175187974612
+		else:
+			h = 0
+		h /= self.G['L']
+		return {'T':(self.N.state['T']-self.B.state['T'])*h}
 
 	def heatConduction(self):
 

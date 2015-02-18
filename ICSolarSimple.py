@@ -90,11 +90,11 @@ a2.mdot = a1.mdot
 a2.addSource(Sa)
 w2.addSource(Sw)
 
-a1.addFlux(f.Flux(aExt,'heatCondEasy',extGeom))
-a1.addFlux(f.Flux(aInt,'heatCondEasy',intGeom))
-a1.addFlux(f.Flux(w1,'heatCondEasy',tubeGeom))
+a1.addFlux(f.Flux(aExt,'heatCondSimple',extGeom))
+a1.addFlux(f.Flux(aInt,'heatCondSimple',intGeom))
+a1.addFlux(f.Flux(w1,'heatCondSimple',tubeGeom))
 a1.addFlux(f.Flux(a0,'heatConvection'))
-w1.addFlux(f.Flux(a1,'heatCondEasy',tubeGeom))
+w1.addFlux(f.Flux(a1,'heatCondSimple',tubeGeom))
 w1.addFlux(f.Flux(w0,'heatConvection'))
 
 a2.addFlux(f.Flux(a1,'heatConvection'))
