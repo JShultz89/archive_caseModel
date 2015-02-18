@@ -75,14 +75,15 @@ class Flux(object):
 
 	The bulk of the hard-coding and material calls are in here
 	"""
+
 	def heatCondEasy(self):
 		# cheat and define h different for each material		
 		if(self.G['type'] == 'ext'):
-			h = 50
+			h = 11.0059962088
 		if(self.G['type'] == 'int'):
-			h = 20
+			h = 10.7354320057
 		if(self.G['type'] == 'wa'):
-			h = 10
+			h = 12.7423617458
 		Res = 1.0/h;
 		return {'T':(self.N.state['T']-self.B.state['T'])/Res}
 

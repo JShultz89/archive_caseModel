@@ -9,6 +9,7 @@ Each Block has:
 	(.S) list of sources, which return a dictionary
 		Sources and Fluxes do not need to be ordered 
 		since they are never explicitly globally unwrapped
+	(.p) dictionary of parameters (time, space, etc)
 
 The equation for the block is
 R(state) = Sum(Fluxes(state)) + Sum(Sources(state)) = 0
@@ -36,17 +37,19 @@ class Block(object):
 
 	input(s):   (s) string corresponding to block name
 							(m) material
-							(states) Optional key-value pairs for
+							(t) time
+							(initialStates) Optional key-value pairs for
 								 			 initial conditions
 	output(s):	None
 	"""
 
-	def __init__(self,s,m,**initialStates):
+	def __init__(self,s,m,t = 0,**initialStates):
 		self.name = s
 		self.m = materials.__dict__.get(m,0)
 		self.state = OrderedDict(initialStates)
 		self.F = []
 		self.S = []	
+		self.t = t
 
 	"""
 	addFlux:
@@ -75,11 +78,6 @@ class Block(object):
 	sums over sources and fluxes to calculate the residual
 	"""
 	def R(self):
-		# print self.name,self.state['T'],[F.F()['T'] for F in self.F]
-		print self.name
-		print [F.F() for F in self.F]
-		# print reduce(lambda x, y: dict((k, v + y[k]) for k, v in x.iteritems()), \
-		# 	[F.F(self) for F in self.F] + [S.S(self) for S in self.S])
 		return reduce(lambda x, y: dict((k, v + y[k]) for k, v in x.iteritems()), \
 			[F.F() for F in self.F] + [S.S(self) for S in self.S])
 
