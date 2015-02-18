@@ -32,6 +32,7 @@ import src.source as s
 
 """ Optional Modules """
 import csv
+import sys
 
 def solve(heatGen,waterTemp,n):
 	""" Boundary flux blocks """
@@ -67,8 +68,6 @@ def solve(heatGen,waterTemp,n):
 
 	""" Block Initialization """
 
-	# Number of modules
-	n = 2
 	# Initial lists of blocks
 	water = []
 	air = []
@@ -84,8 +83,8 @@ def solve(heatGen,waterTemp,n):
 
 		if(i % 2 == 1): # odd regions are "tube" regions
 			# Every block is named for its material in this case
-			water.append(b.Block('waterTube' + str(i),'water',T = 15))
-			air.append(b.Block('airTube' + str(i),'air',T = 22))
+			water.append(b.Block('waterTube' + str((i+1)/2),'water',T = 15))
+			air.append(b.Block('airTube' + str((i+1)/2),'air',T = 22))
 			# Water tube has one flux for heat conduction
 			if( i == 1 ): 
 				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':0.15}))
@@ -100,8 +99,8 @@ def solve(heatGen,waterTemp,n):
 				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':0.3}))
 		else: # These are "module" region
 			# Every block is named for its material in this case
-			water.append(b.Block('waterModule' + str(i),'water',T = 15))
-			air.append(b.Block('airModule' + str(i),'air',T = 22))
+			water.append(b.Block('waterModule' + str(i/2),'water',T = 15))
+			air.append(b.Block('airModule' + str(i/2),'air',T = 22))
 			water[i].addSource(Sw)
 			air[i].addSource(Sa)
 
@@ -128,7 +127,7 @@ def solve(heatGen,waterTemp,n):
 	return water[-1].state['T']
 
 if __name__ == "__main__":
-	if(1):
+	if len(sys.argv) < 4:
 		csvfile = open('nov25.csv','rU')
 		csvwrite = open('simulation.csv','w')
 		cr = csv.DictReader(csvfile)
@@ -142,3 +141,5 @@ if __name__ == "__main__":
 				'exp_outlet':row['exp_outlet'],'sim_outlet':round(Tf,8),'exp_heatgen':row['exp_heatgen']})
 		csvfile.close()
 		csvwrite.close()
+	else:
+		print solve(float(sys.argv[1]),float(sys.argv[2]),int(sys.argv[3]))
