@@ -137,8 +137,8 @@ if __name__ == "__main__":
 		for row in cr:
 			heatGen = float(row['exp_heatgen'])
 			waterTemp = float(row['exp_inlet'])
-			Tf = solve(heatGen*1e-3,waterTemp,2)
+			Tf = solve(heatGen*1e-3,waterTemp,12)
 			cw.writerow({'Timestamp':row['Timestamp'],'exp_inlet':row['exp_inlet'], \
-				'exp_outlet':round(Tf,8),'exp_heatgen':row['exp_heatgen']})
+				'exp_outlet',row['exp_outlet'],'sim_outlet':round(Tf,8),'exp_heatgen':row['exp_heatgen']})
 		csvfile.close()
 		csvwrite.close()
