@@ -3,25 +3,6 @@ This defines the ICSolar model proposed by Assad Oberai
 
 where we our problem is similar to this
 
-<<<<<<< HEAD
-					|-------|w|---||
-					|    5  |w|   ||
-					|  |\	|w|   ||
-					|  | \	|w|   ||
-					|--| 4|-|w|---||
-					|  | /	|w|   ||
-					|  |/   |w|   ||
-					|       |w|   ||
-		exterior	|	 3 	|w|   ||  interior 
-					|       |w|   ||
-					|  |\	|w|   ||
-					|  | \	|w|   ||
-					|--| 2|-|w|---||
-					|  | /	|w|   ||
-					|  |/   |w|   ||
-					|    1  |w|   ||
-					|-------|w|---||
-=======
           |-------|w|---||
           |    5  |w|   ||
           |  |\		|w|   ||
@@ -39,7 +20,6 @@ exterior	|		 3 	|w|   ||  interior
           |  |/   |w|   ||
           |    1  |w|   ||
           |-------|w|---||
->>>>>>> a2438d6dd5dfcf8bbdf6bdadafc2a99bab80476f
 
 with n modules, and 2*n+1 air regions, and 2*n+1 water regions
 """
@@ -66,7 +46,7 @@ def solve(heatGen,waterTemp,n):
 	# These are added to the class object, and are not part of the
 	# default block requirement
 	w0.mdot = 8.5e-07*w0.m['rho'](w0.state)
-	a0.mdot = 2.0*a0.m['rho'](a0.state)
+	a0.mdot = 2.0*a0.m['rho'](a0.state)*0.4*0.4
 
 	# All these boundary blocks need are temperatures
 	# define Exterior boundary condition
@@ -157,7 +137,7 @@ if __name__ == "__main__":
 		for row in cr:
 			heatGen = float(row['exp_heatgen'])
 			waterTemp = float(row['exp_inlet'])
-			Tf = solve(heatGen*1e-3,waterTemp,12)
+			Tf = solve(heatGen*1e-3,waterTemp,3)
 			cw.writerow({'Timestamp':row['Timestamp'],'exp_inlet':row['exp_inlet'], \
 				'exp_outlet':row['exp_outlet'],'sim_outlet':round(Tf,8),'exp_heatgen':row['exp_heatgen']})
 		csvfile.close()

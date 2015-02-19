@@ -116,6 +116,7 @@ class Flux(object):
 		return {'T':(self.N.state['T']-self.B.state['T'])/Res}
 
 	def heatConvection(self):
+		# [Question] m_dot*Cp*dT = Q, does having the dictionary for "T" apply this as a temperature or as heat?
 		return {'T':self.B.mdot*self.B.m['Cp'](self.B.state)*(self.B.state['T']-self.N.state['T'])}
 
 	def difference(self):
