@@ -79,7 +79,7 @@ class Flux(object):
 			h = 0.16079175187974612
 		else:
 			h = 0
-		h /= self.G['L']
+		h *= self.G['L']
 		return {'T':(self.N.state['T']-self.B.state['T'])*h}
 
 	def heatConduction(self):
