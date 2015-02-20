@@ -29,11 +29,11 @@ import src.blocks as b
 import src.flux as f
 import src.problem as p
 import src.source as s
-
 """ Optional Modules """
 import csv
 import sys
-
+import matplotlib.pyplot as plt
+import numpy as np
 def solve(heatGen,waterTemp,n):
 	""" Boundary flux blocks """
 	""" All these blocks remain constant """
@@ -90,13 +90,13 @@ def solve(heatGen,waterTemp,n):
 				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':0.15}))
 				# Air has three, corresponding to the windows and the water-tube
 				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':0.15}))
-				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':0.15}))
-				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':0.15}))
+				# air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':0.15}))
+				# air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':0.15}))
 			else:
 				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':0.3}))
 				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':0.3}))
-				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':0.3}))
-				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':0.3}))
+				# air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':0.3}))
+				# air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':0.3}))
 		else: # These are "module" region
 			# Every block is named for its material in this case
 			water.append(b.Block('waterModule' + str(i/2),'water',T = 15))
@@ -133,13 +133,34 @@ if __name__ == "__main__":
 		cr = csv.DictReader(csvfile)
 		cw = csv.DictWriter(csvwrite,['Timestamp','exp_inlet','sim_outlet','exp_outlet','exp_heatgen'])
 		cw.writeheader()
+		Tin = []
+		Tout = []
+		Tsim = []
+		numMod = 3
 		for row in cr:
 			heatGen = float(row['exp_heatgen'])
 			waterTemp = float(row['exp_inlet'])
-			Tf = solve(heatGen*1e-3,waterTemp,12)
+			Tf = solve(heatGen/numMod*1e-3,waterTemp,numMod)
 			cw.writerow({'Timestamp':row['Timestamp'],'exp_inlet':row['exp_inlet'], \
 				'exp_outlet':row['exp_outlet'],'sim_outlet':round(Tf,8),'exp_heatgen':row['exp_heatgen']})
+			Tsim.append(Tf)
+			Tout.append(row['exp_outlet'])
+			Tin.append(waterTemp)
+
 		csvfile.close()
 		csvwrite.close()
+		i = range(0,len(Tin))
+		plt.plot(i,Tin,linewidth=5.0,label='Inlet')
+		plt.plot(i,Tout,linewidth=5.0,label='Experimental')
+		plt.plot(i,Tsim,linewidth=5.0,label='Model')
+
+		plt.legend()
+		plt.xlabel('Measurement number (time)')
+		plt.ylabel('Temperature (C)')
+		plt.title(str(numMod) + ' Modules')
+		plt.ylim([0,float(max(Tout))+20])
+		# plt.show()
+		plt.savefig('nov25.png')
+		plt.close()
 	else:
 		print solve(float(sys.argv[1]),float(sys.argv[2]),int(sys.argv[3]))
