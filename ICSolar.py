@@ -9,9 +9,9 @@ where we our problem is similar to this
           |  | \	|w|   ||
           |--| 4|-|w|---||
           |  | /	|w|   ||
-          |  |/   |w|   ||
-          |       |w|   ||
-exterior	|		 3 	|w|   ||  interior 
+          |  |/	    |w|   ||
+          |   	    |w|   ||
+exterior  |		 3 	|w|   ||  interior 
           |       |w|   ||
           |  |\		|w|   ||
           |  | \	|w|   ||
@@ -91,13 +91,13 @@ def solve(heatGen,waterTemp,n):
 				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':0.15}))
 				# Air has three, corresponding to the windows and the water-tube
 				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':0.15}))
-				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':0.15}))
-				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':0.15}))
+				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int_noglass','m':[],'L':0.15}))
+				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext_insulated','m':[],'L':0.15}))
 			else:
 				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':0.3}))
 				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':0.3}))
-				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':0.3}))
-				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':0.3}))
+				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int_noglass','m':[],'L':0.3}))
+				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext_insulated','m':[],'L':0.3}))
 		else: # These are "module" region
 			# Every block is named for its material in this case
 			water.append(b.Block('waterModule' + str(i),'water',T = 15))
@@ -137,7 +137,7 @@ if __name__ == "__main__":
 		for row in cr:
 			heatGen = float(row['exp_heatgen'])
 			waterTemp = float(row['exp_inlet'])
-			Tf = solve(heatGen*1e-3,waterTemp,3)
+			Tf = solve(heatGen*1e-3/3.0,waterTemp,3)
 			cw.writerow({'Timestamp':row['Timestamp'],'exp_inlet':row['exp_inlet'], \
 				'exp_outlet':row['exp_outlet'],'sim_outlet':round(Tf,8),'exp_heatgen':row['exp_heatgen']})
 		csvfile.close()
