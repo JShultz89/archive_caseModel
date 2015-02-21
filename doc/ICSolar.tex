@@ -34,25 +34,46 @@ commentstyle=\color{commentsgrey}
 \begin{document}
 
 \maketitle
-\section{Heat Conduction}
-\subsection{Through the Tube}
-For the pipe filled with water, we have
-\[ R_{total} = R_{conv,water} + R_{cyl,tube} + R_{cyl,ins} + R_{conv,air} \]
-\[ R_{total} = \frac{1}{2\pi r_{inner} Lh_{water}} + \frac{\ln r_{tube}/r_{inner}}{2\pi L k_{tube}} + \frac{\ln r_{ins}/r_{tube} }{2\pi L k_{ins}}+ \frac{1}{2\pi r_{ins} Lh_{air}}\]
-and 
-\[ \dot{Q} = \frac{T_{water}-T_{air}}{R_{total}} \]
-In your python code, you have
-\begin{lstlisting}
-R.R_cond_t = math.log((diameter_tubing)/(diameter_inside)) / 
-		(2 * math.pi * diameter_tubing * tubing_length * cond_tubing)    
-R.R_cond_ins = math.log((diameter_insulation)/(diameter_tubing)) / 
-		(2.0 * math.pi * diameter_insulation * tubing_length * cond_insulation)  
-\end{lstlisting}
-Which I believe have an extra diameter in the denominator, which is why both your matlab code and your python script give the different answer. Unless my theory is wrong, which it might be, but I have a copy of the thermodynamics book in front of me. My code does have errors in the fluxes, but theres a reason mine doesnt seem to do much, and its the differing of this large number.
-\subsection{Across a Plate}
-We have \[ R_{total} = \frac{1}{h_{air}A} + \frac{t_{plate}}{k_{plate}A} + \frac{1}{h_{interior}A} \] where $t_{plate}$ is the thickness of the glass, and $A$ is the surface area. Similarly,
-\[ \dot{Q} = \frac{T_{\mathrm{outside of plate}}-T_{air}}{R_{total}} \]
-This is correct in your code.
+Consider the model of air and water interaction consisting of an initial inlet region (denoted by 0) and a pair of regions, an open region with pipe followed by a module, denoted by (1,2) satisfying 
+\begin{eqnarray} 
+W_1: & & \dot{m}_wC_{p,w}(T_{w,1}-T_{w,0}) - h_{wa}(T_{a,1}-T_{w,1}) = 0 \\
+A_1: & & \dot{m}_aC_{p,a}(T_{a,1}-T_{a,0}) - h_{wa}(T_{w,1}-T_{a,1}) - h_{e}(T_e-T_{a,1}) - h_{i}(T_i-T_{a,1})= 0 \\
+W_2: & & \dot{m}_wC_{p,w}(T_{w,2}-T_{w,1}) - Q_w = 0\\
+A_2: & & \dot{m}_aC_{p,a}(T_{a,2}-T_{a,1}) - Q_a = 0 
+\end{eqnarray}
+Where $i$ and $e$ are interior and exterior contributions. Each pair of these forms a `module'. In this work, we use
+\begin{eqnarray}
+C_{p,w} & = & 4.218 kJ/(kg K) \\
+\dot{m}_w & = & 0.0008483 kg/s \\
+C_{p,a} & = & 1.005 kJ/(kg K) \\
+\dot{m}_a & = & 0.384 kg/s \\
+h_{wa} & = & 4.823 \times 10^{-5} kW/(K m)\\
+h_{i} & = & 1.572 \times 10^{-4} kW/(K m)\\
+h_{e} & = & 4.837 \times 10^{-4} kW/(K m)\\
+\end{eqnarray}
+With Initial and Boundary Conditions of $T_{a,0} = 20 C, T_i = 25.0 C, T_e = 22.5 C$. At this point, we set $Q_a = 0$ as the surrounding air acts like a reservoir and its effect is currently minimal. Our inputs are $T_{w,0}$ and $Q_w$ from experimental data. We take experimental data from the file \texttt{nov25\_2.csv} located in the github repository. 
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.6\textwidth]{nov25.png}
+\caption{Comparison between experiment and model for 3 modules, water temperature in last module compared.}
+\end{figure}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.6\textwidth]{nov25modules.png}
+\caption{Model results for 3 module case, using experimental inputs. Regions 2,4,6 correspond to modules.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.6\textwidth]{nov25_12.png}
+\caption{Comparison between experiment (3 modules) and model (12 modules), water temperature in last module compared.}
+\end{figure}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.6\textwidth]{nov25modules_12.png}
+\caption{Model results for 3 module case, using experimental inputs. Legend not shown, but self explanatory.}
+\end{figure}
 
 \end{document}
 
