@@ -72,15 +72,19 @@ class Flux(object):
 	
 		# All per meter
 		if(self.G['type'] == 'ext'):
-			h = 1.5583718700478653
+			# h = 1.5583718700478653
+			h = 0.5233
 		elif(self.G['type'] == 'int'):
-			h = 0.5240370865137535
+			# h = 0.5240370865137535
+			h = 1.6124
 		elif(self.G['type'] == 'wa'):
 			h = 0.16079175187974612
 		else:
 			h = 0
-		h *= self.G['L']
-		return {'T':(self.N.state['T']-self.B.state['T'])*h}
+		# h *= self.G['L']/1000.
+		# h = 0
+		h *= 0.3/1000.
+		return {'T':(self.B.state['T']-self.N.state['T'])*h}
 
 	def heatConduction(self):
 

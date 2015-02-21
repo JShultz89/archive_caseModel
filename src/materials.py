@@ -38,13 +38,15 @@ constWater = \
 {
 	'name':'constWater',
 	'type':'liquid',
-	'Cp': lambda state = 0 : 4.218
+	'Cp': lambda state = 0 : 4.218,
+	'rho': lambda state = 0: 998
 }
 constAir = \
 {
 	'name':'constAir',
 	'type':'liquid',
-	'Cp': lambda state = 0 : 1.005
+	'Cp': lambda state = 0 : 1.005,
+	'rho':lambda state = 0 : 1.20
 }
 water = \
 {
