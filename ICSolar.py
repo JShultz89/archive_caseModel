@@ -132,7 +132,7 @@ def solve(heatGen,waterTemp,n):
 	
 if __name__ == "__main__":
 	if len(sys.argv) < 4:
-		csvfile = open('nov25_2.csv','rU')
+		csvfile = open('Feb11.csv','rU')
 		csvwrite = open('simulation.csv','w')
 		cr = csv.DictReader(csvfile)
 		cw = csv.DictWriter(csvwrite,['Timestamp','exp_inlet','sim_outlet','exp_outlet','exp_heatgen'])
@@ -140,7 +140,7 @@ if __name__ == "__main__":
 		Tin = []
 		Tout = []
 		# TsimA = []
-		numMod = 12
+		numMod = 6
 		TsimW = []
 		AllW =[]
 
@@ -170,7 +170,7 @@ if __name__ == "__main__":
 		plt.title('Comparison with Expt for ' + str(numMod) + ' Modules')
 		# plt.ylim([float(min(TsimW))-10,float(max(Tout))+20])
 		# plt.show()
-		plt.savefig('nov25.png')
+		plt.savefig('Feb11.png')
 		plt.close()
 		for j in range(0,len(Wt)):
 			Wj = [w[j] for w in AllW]
