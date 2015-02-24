@@ -20,6 +20,8 @@ ode is used for solving transient
 from scipy.optimize import fsolve
 from scipy.integrate import odeint
 import numpy as np
+from collections import OrderedDict
+
 class Problem(object):
 	""" 
 	Problem Class
@@ -82,7 +84,6 @@ class Problem(object):
 			solution[ix] = self.b[i].state[k]
 		solution = fsolve(self.r, solution)
 		self.update(solution)
-
 	"""
 	solveUnst:	solve the transient problem
 
@@ -105,6 +106,13 @@ class Problem(object):
 		# final update
 		self.update(soln[-1,:],t[-1])
 
+		# Lets output all the steps
+		allSoln = dict([(b.name + '_'+s,[]) for b in self.b for s in b.state])
+		for j in range(0,len(t)):
+			for ix, (i,k) in enumerate(self.mapping):
+				allSoln[self.b[i].name+'_'+k].append(soln[j,ix])
+		allSoln['t'] = [t]
+		return allSoln
 	"""
 	printSolution:		Outputs solution to screen
 	"""
