@@ -9,7 +9,8 @@ Each Block has:
 	(.S) list of sources, which return a dictionary
 		Sources and Fluxes do not need to be ordered 
 		since they are never explicitly globally unwrapped
-	(.p) dictionary of parameters (time, space, etc)
+	(.t) time
+	(.T) Time function, returns dict of coefficient on time terms
 
 The equation for the block is
 R(state) = Sum(Fluxes(state)) + Sum(Sources(state)) = 0
@@ -50,6 +51,7 @@ class Block(object):
 		self.F = []
 		self.S = []	
 		self.t = t
+		self.T = lambda state : dict([(s,1) for s in state])
 
 	"""
 	addFlux:

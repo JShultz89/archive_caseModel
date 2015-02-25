@@ -49,7 +49,7 @@ a0 = b.Block('airInlet','constAir',T = 20)
 
 ## Define an unsteady boundary block for inlet and outlet by adding a source
 # Tentatively solve from 0 to 1, drive it with 
-w0.addSource(s.Source('time', T = lambda t: 10*t + 20 ))
+w0.addSource(s.Source('time', T = lambda t: 20 ))
 a0.addSource(s.Source('time', T = lambda t: 20 ))
 
 
@@ -99,17 +99,28 @@ for i in range(1,2*n+1):
 			air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':0.15}))
 			air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':0.15}))
 			air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':0.15}))
+				# need to set up time dependent functions
+			air[i].T = lambda state : {'T': -1.2*0.048*1.005/2.0}
+			water[i].T = lambda state : {'T': -998.0*8.48e-6*4.218/2.0}
 		else:
 			water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':0.3}))
 			air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':0.3}))
 			air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':0.3}))
 			air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':0.3}))
+				# need to set up time dependent functions
+			air[i].T = lambda state : {'T': -1.2*0.048*1.005}
+			water[i].T = lambda state : {'T': -998.0*8.48e-6*4.218}
 	else: # These are "module" region
 		# Every block is named for its material in this case
 		water.append(b.Block('waterModule' + str(i/2),'water',T = 15))
 		air.append(b.Block('airModule' + str(i/2),'air',T = 22))
 		water[i].addSource(Sw)
 		air[i].addSource(Sa)
+		# lets assume a small mass, and see what happens
+		air[i].T = lambda state : {'T': -1.2*0.048*1.e-6*1.005}
+		water[i].T = lambda state : {'T': -998.0*8.48e-6*1.e-6*4.218}
+
+
 
 	# These are the connectivity between regions, each block takes heat
 	# from the block "below" it
@@ -127,5 +138,10 @@ for i in range(1,2*n+1):
 # Start the problem with solvable blocks, which
 # are all the blocks except the first two
 ICSolar = p.Problem(air[1::]+water[1::],[a0,w0])
-soln = ICSolar.solveUnst(0,1,2)
-print soln['t']
+soln = ICSolar.solveUnst(0,3600,2)
+# print
+print soln
+plt.plot(soln['t'][0]/60, np.array(soln['waterModule1_T']));
+plt.savefig('test.png')
+# plt.show()
+plt.close()

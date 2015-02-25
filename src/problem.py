@@ -56,6 +56,7 @@ class Problem(object):
 			bc.t = t
 			for s in bc.state:
 				bc.state[s] = bc.S[0].S(bc)[s]
+				# print bc.name, bc.state['T'], t
 
 	"""
 	r:					Global residual function r(solution) 
@@ -68,7 +69,7 @@ class Problem(object):
 	"""
 	def r(self,solution,t = 0):
 		self.update(solution,t)
-		return [self.b[i].R()[v] for i,v in self.mapping]
+		return [self.b[i].R()[v]*self.b[i].T(self.b[i].state)[v] for i,v in self.mapping]
 
 	"""
 	solve:			wrapper for chosen (non)linear solver
@@ -102,7 +103,7 @@ class Problem(object):
 		for ix, (i,k) in enumerate(self.mapping):
 			solution[ix] = self.b[i].state[k]
 		t = np.linspace(ti,tf,n)
-		soln = odeint(self.r, solution, t)
+		soln = odeint(self.r, solution, t,hmax=(tf-ti)/n)
 		# final update
 		self.update(soln[-1,:],t[-1])
 
