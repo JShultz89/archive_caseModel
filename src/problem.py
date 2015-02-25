@@ -69,7 +69,7 @@ class Problem(object):
 	"""
 	def r(self,solution,t = 0):
 		self.update(solution,t)
-		return [self.b[i].R()[v]*self.b[i].T(self.b[i].state)[v] for i,v in self.mapping]
+		return [self.b[i].R()[v]/self.b[i].T(self.b[i].state)[v] for i,v in self.mapping]
 
 	"""
 	solve:			wrapper for chosen (non)linear solver
@@ -112,7 +112,7 @@ class Problem(object):
 		for j in range(0,len(t)):
 			for ix, (i,k) in enumerate(self.mapping):
 				allSoln[self.b[i].name+'_'+k].append(soln[j,ix])
-		allSoln['t'] = [t]
+		allSoln['t'] = t.tolist()
 		return allSoln
 	"""
 	printSolution:		Outputs solution to screen

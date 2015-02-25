@@ -138,10 +138,10 @@ for i in range(1,2*n+1):
 # Start the problem with solvable blocks, which
 # are all the blocks except the first two
 ICSolar = p.Problem(air[1::]+water[1::],[a0,w0])
-soln = ICSolar.solveUnst(0,3600,2)
+soln = ICSolar.solveUnst(0,36000000,2000)
 # print
-print soln
-plt.plot(soln['t'][0]/60, np.array(soln['waterModule1_T']));
+print [(s,soln[s][-1]) for s in soln]
+plt.plot(np.array(soln['t'])/60, np.array(soln['waterModule1_T']));
 plt.savefig('test.png')
 # plt.show()
 plt.close()
