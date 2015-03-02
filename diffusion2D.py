@@ -28,7 +28,7 @@ import src.blocks as b
 import src.flux as f
 import src.problem as p
 import src.source as s
-
+import numpy as np
 def diff2D(N):
 	""" 
 	lets define a uniform square mesh on [-1, 1] x [1, 1]
@@ -76,7 +76,7 @@ def diff2D(N):
 
 	# solve the problem on the interior blocks
 	P = p.Problem(interiorBlocks,boundaryBlocks)
-	P.solveUnst(0,tf,10)
+	P.solveUnst(np.linspace(0,tf,10))
 	# P.printSolution()
 	Eu = 0
 	Ev = 0

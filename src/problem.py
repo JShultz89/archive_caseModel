@@ -78,13 +78,13 @@ class Problem(object):
 	output(s):	None
 
 	unwraps blocks, passes into solver, finishes by updating blocks one last time
-	"""
-	def solve(self):
+	""",
+	def solve(self,t = 0):
 		solution = [None]*len(self.mapping)
 		for ix, (i,k) in enumerate(self.mapping):
 			solution[ix] = self.b[i].state[k]
-		solution = fsolve(self.r, solution)
-		self.update(solution)
+		solution = fsolve(self.r, solution,args=t)
+		self.update(solution,t)
 	"""
 	solveUnst:	solve the transient problem
 
@@ -95,24 +95,23 @@ class Problem(object):
 
 	unwraps blocks, passes into solver, finishes by updating blocks one last time
 	"""
-	def solveUnst(self,ti,tf,n):
+	def solveUnst(self,t):
 		solnPoints = {}
 		solution = [None]*len(self.mapping)
 		# This has the unsteady part
 		# Solver, just live and let live	
 		for ix, (i,k) in enumerate(self.mapping):
 			solution[ix] = self.b[i].state[k]
-		t = np.linspace(ti,tf,n)
-		soln = odeint(self.r, solution, t,hmax=(tf-ti)/n)
+
+		soln = odeint(self.r, solution, t)
 		# final update
 		self.update(soln[-1,:],t[-1])
-
 		# Lets output all the steps
 		allSoln = dict([(b.name + '_'+s,[]) for b in self.b for s in b.state])
 		for j in range(0,len(t)):
 			for ix, (i,k) in enumerate(self.mapping):
 				allSoln[self.b[i].name+'_'+k].append(soln[j,ix])
-		allSoln['t'] = t.tolist()
+		allSoln['t'] = t
 		return allSoln
 	"""
 	printSolution:		Outputs solution to screen

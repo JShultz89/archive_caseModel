@@ -43,6 +43,7 @@ class Source(object):
 	def time(self,b):
 		return dict([(state,self.p[state](b.t)) for state in b.state])
 
+
 if __name__ == "__main__":
   import doctest
   import blocks
