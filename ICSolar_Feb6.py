@@ -34,26 +34,26 @@ import csv
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
-def solve(heatGen,waterTemp,n):
+def solve(heatGen,waterTemp,n,flowrate):
 	""" Boundary flux blocks """
 	""" All these blocks remain constant """
 	# define inlet water with initial state
 	w0 = b.Block('waterInlet','constWater',T = waterTemp)
 
 	# define inlet air with initial state
-	a0 = b.Block('airInlet','constAir',T = 28)
+	a0 = b.Block('airInlet','constAir',T = 20)
 
 	# We will need mass flow rates for our fluxes, so initialize them here
 	# These are added to the class object, and are not part of the
 	# default block requirement
-	w0.mdot = lambda T = 0 : 1.61e-6*w0.m['rho'](w0.state)
-	a0.mdot = lambda T = 0 : 2.0*a0.m['rho'](a0.state)*0.16
+	w0.mdot = flowrate*1.0e-6*w0.m['rho'](w0.state)
+	a0.mdot = 2.0*a0.m['rho'](a0.state)*0.16
 
 	# All these boundary blocks need are temperatures
 	# define Exterior boundary condition
 	aExt = b.Block('Exterior','air',T = 20.0)
 	# define Interior boundary condition
-	aInt = b.Block('Interior','air',T = 22.5)
+	aInt = b.Block('Interior','air',T = 21.5)
 
 	""" Sources used in even numbered blocks """
 
@@ -80,7 +80,7 @@ def solve(heatGen,waterTemp,n):
 		if(i % 2 == 1): # odd regions are "tube" regions
 			# Every block is named for its material in this case
 			water.append(b.Block('waterTube' + str((i+1)/2),'constWater',T = 15))
-			air.append(b.Block('airTube' + str((i+1)/2),'constAir',T = 22.5))
+			air.append(b.Block('airTube' + str((i+1)/2),'constAir',T = 21.5))
 			# Water tube has one flux for heat conduction
 			if( i == 1 ): 
 				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':L/2.0}))
@@ -96,7 +96,7 @@ def solve(heatGen,waterTemp,n):
 		else: # These are "module" region
 			# Every block is named for its material in this case
 			water.append(b.Block('waterModule' + str(n-i/2),'water',T = 15))
-			air.append(b.Block('airModule' + str(n-i/2),'air',T = 22.5))
+			air.append(b.Block('airModule' + str(n-i/2),'air',T = 21.5))
 			water[i].addSource(s.Source('const',T = -heatGen[n-i/2]*1e-3))
 			air[i].addSource(Sa)
 
@@ -129,8 +129,8 @@ def solve(heatGen,waterTemp,n):
 	
 if __name__ == "__main__":
 	if len(sys.argv) < 4:
-		csvfile = open('Feb11.csv','rU')
-		csvwrite = open('Feb11_sim.csv','w')
+		csvfile = open('Feb6.csv','rU')
+		csvwrite = open('Feb6_sim.csv','w')
 		cr = csv.DictReader(csvfile)
 		cw = csv.DictWriter(csvwrite,['Timestamp','exp_inlet','exp_outlet','sim_outlet'])
 		cw.writeheader()
@@ -144,7 +144,7 @@ if __name__ == "__main__":
 		for row in cr:
 			heatGen = [float(row['heatgen_m'+str(i)]) for i in range(1,7)]
 			waterTemp = float(row['exp_inlet'])
-			Wt = solve(heatGen,waterTemp,numMod)
+			Wt = solve(heatGen,waterTemp,numMod,float(row['exp_flowrate']))
 			WtEnd = Wt[-1]
 			cw.writerow({'Timestamp':row['Timestamp'],'exp_inlet':row['exp_inlet'], \
 				'exp_outlet':row['exp_outlet'],'sim_outlet':round(WtEnd,8)})
@@ -167,7 +167,7 @@ if __name__ == "__main__":
 		plt.title('Comparison with Expt for ' + str(numMod) + ' Modules')
 		# plt.ylim([float(min(TsimW))-10,float(max(Tout))+20])
 		# plt.show()
-		plt.savefig('feb11.png')
+		plt.savefig('feb6.png')
 		plt.close()
 		for j in range(0,len(Wt)):
 			Wj = [w[j] for w in AllW]
@@ -184,7 +184,5 @@ if __name__ == "__main__":
 		plt.title('Individual Region Temperatures')		
 		plt.savefig('feb11modules.png')
 		plt.close()
-
-
 	else:
-		print solve(float(sys.argv[1]),float(sys.argv[2]),int(sys.argv[3]))
+		print "nope"

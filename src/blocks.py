@@ -14,6 +14,8 @@ Each Block has:
 
 The equation for the block is
 R(state) = Sum(Fluxes(state)) + Sum(Sources(state)) = 0
+In the unsteady case
+d/d(state) = R(state)
 
 All blocks are connected through fluxes, defined in flux.py
 

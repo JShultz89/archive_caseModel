@@ -46,8 +46,8 @@ def solve(heatGen,waterTemp,n):
 	# We will need mass flow rates for our fluxes, so initialize them here
 	# These are added to the class object, and are not part of the
 	# default block requirement
-	w0.mdot = lambda T = 0 : 1.61e-6*w0.m['rho'](w0.state)
-	a0.mdot = lambda T = 0 : 2.0*a0.m['rho'](a0.state)*0.16
+	w0.mdot = 1.61e-6*w0.m['rho'](w0.state)
+	a0.mdot = 2.0*a0.m['rho'](a0.state)*0.16
 
 	# All these boundary blocks need are temperatures
 	# define Exterior boundary condition

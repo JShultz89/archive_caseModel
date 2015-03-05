@@ -45,18 +45,18 @@ class Problem(object):
 	output(s):	None
 	"""
 
-	def update(self,solution,t = 0):
+	def update(self,solution):
 		for ix, (i,k) in enumerate(self.mapping):
 			self.b[i].state[k] = solution[ix]
-		# update time	
-		for b in self.b:	
-			b.t = t
-		# BC states are updated using a single source function to drive them	
 		for bc in self.bc:
-			bc.t = t
 			for s in bc.state:
 				bc.state[s] = bc.S[0].S(bc)[s]
-				# print bc.name, bc.state['T'], t
+
+	def updateUnst(self,t):
+		# update time	
+		for b in self.b + self.bc:	
+			b.t = t
+
 
 	"""
 	r:					Global residual function r(solution) 
@@ -67,8 +67,13 @@ class Problem(object):
 	updates solution first, then computes
 	should be passed into another function
 	"""
-	def r(self,solution,t = 0):
-		self.update(solution,t)
+	def r(self,solution):
+		self.update(solution)
+		return [self.b[i].R()[v] for i,v in self.mapping]
+
+	def rUnst(self,solution,t):
+		self.updateUnst(t)
+		self.update(solution)
 		return [self.b[i].R()[v]/self.b[i].T(self.b[i].state)[v] for i,v in self.mapping]
 
 	"""
@@ -79,12 +84,13 @@ class Problem(object):
 
 	unwraps blocks, passes into solver, finishes by updating blocks one last time
 	""",
-	def solve(self,t = 0):
+	def solve(self,t=0):
+		self.updateUnst(t)
 		solution = [None]*len(self.mapping)
 		for ix, (i,k) in enumerate(self.mapping):
 			solution[ix] = self.b[i].state[k]
-		solution = fsolve(self.r, solution,args=t)
-		self.update(solution,t)
+		solution = fsolve(self.r, solution)
+		self.update(solution)
 	"""
 	solveUnst:	solve the transient problem
 
@@ -96,16 +102,17 @@ class Problem(object):
 	unwraps blocks, passes into solver, finishes by updating blocks one last time
 	"""
 	def solveUnst(self,t):
-		solnPoints = {}
 		solution = [None]*len(self.mapping)
 		# This has the unsteady part
 		# Solver, just live and let live	
 		for ix, (i,k) in enumerate(self.mapping):
 			solution[ix] = self.b[i].state[k]
 
-		soln = odeint(self.r, solution, t)
+		soln = odeint(self.rUnst, solution, t)
 		# final update
-		self.update(soln[-1,:],t[-1])
+		self.updateUnst(t[-1])
+		self.update(soln[-1,:])
+
 		# Lets output all the steps
 		allSoln = dict([(b.name + '_'+s,[]) for b in self.b for s in b.state])
 		for j in range(0,len(t)):
@@ -113,12 +120,6 @@ class Problem(object):
 				allSoln[self.b[i].name+'_'+k].append(soln[j,ix])
 		allSoln['t'] = t
 		return allSoln
-	"""
-	printSolution:		Outputs solution to screen
-	"""
-	def printSolution(self):
-		for b in self.b:
-			b.printMe()
 
 if __name__ == "__main__":
     import doctest

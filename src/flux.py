@@ -85,41 +85,9 @@ class Flux(object):
 
 		return {'T':(self.B.state['T']-self.N.state['T'])*h}
 
-	def heatConduction(self):
-
-		"""
-		returns the convection heat transfer coefficient at a specific temperature
-
-		"""
-		def h(b):
-			
-			m = self.B.m
-			h = m['k'](self.B.state)/self.G['cL']
-			if(m['name'] == 'water' and self.G['type'] == 'cyl'):
-				# Nu_D for Reynold numbers < 2300 (laminar) 
-				# and constant wall temperature. 
-				# Could use Nu_D = 4.36 for constant heat transfer.
-				h *= 3.66
-			elif(m['name'] == 'air' and self.G['type'] == 'cyl'):
-				Re = self.B.mdot/m['rho'](self.B.state)*self.G['cL']/m['mu'](self.B.state)	
-				h *= 0.037*Re**(4.0/5.0)*m['Pr'](self.B.state)**(1.0/3.0)
-			elif(m['name'] == 'air' and self.G['type'] == 'plateLayer'):
-				Re = self.B.mdot/m['rho'](self.B.state)*self.G['cL']/m['mu'](self.B.state)
-				h *= 0.0296*Re**(4.0/5.0)*m['Pr'](self.B.state)**(1.0/3.0)
-			elif(m['name'] == 'glass'):
-				pass
-		
-			return h		
-		# temperature doesnt matter in the layers, as the k are constant
-
-		Res = 1/(self.A[0]*h(self.B)) + \
-					np.dot([1/m['k']() for m in self.m],[1/A for A in self.A[1:-1]]) + \
-					1/(self.A[-1]*h(self.N))
-		# print np.array([A for A in self.A[1:-1]])
-		return {'T':(self.N.state['T']-self.B.state['T'])/Res}
-
 	def heatConvection(self):
-		return {'T':self.B.mdot*self.B.m['Cp'](self.B.state)*(self.B.state['T']-self.N.state['T'])}
+		return {'T':self.B.mdot(self.B)*self.B.m['Cp'](self.B.state)*(self.B.state['T']-self.N.state['T'])}
+
 
 	def difference(self):
 		return dict((s,(self.N.state[s]-self.B.state[s])/self.G['d']) for s in self.B.state)
