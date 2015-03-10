@@ -16,10 +16,10 @@ import numpy as np
 """ Boundary flux blocks """
 """ All these blocks remain constant """
 # define inlet water with initial state
-w0 = b.Block('waterInlet','constWater',T = 50.0, m = 3.2e-6)
+w0 = b.Block('waterInlet','constWater',T = 50.0, m = 1e-4)
 
 # define inlet air with initial state
-a0 = b.Block('airInlet','airVapor',T = 28.0, m = 0.5, mvapor = 0.0)
+a0 = b.Block('airInlet','airVapor',T = 28.0, m = 0.5, mvapor = 0.01)
 
 
 
@@ -44,14 +44,16 @@ air = []
 water.append(w0)
 air.append(a0)
 L = 0.3
-n = 1
+n = 5
+# neagative
+vaporrate = -0.00001
 #### Initialize the blocks we will solve on
 for i in range(1,2*n+1):
 
 	if(i % 2 == 1): # odd regions are "tube" regions
 		# Every block is named for its material in this case
 		water.append(b.Block('waterTube' + str((i+1)/2),'constWater',T = 15,m = 3.2e-6))
-		air.append(b.Block('airTube' + str((i+1)/2),'airVapor',T = 22.5,m = 0.5, mvapor = 0.0))
+		air.append(b.Block('airTube' + str((i+1)/2),'airVapor',T = 22.5,m = 0.5, mvapor = 0.01))
 		# Water tube has one flux for heat conduction
 		if( i == 1 ): 
 			water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':L/2.0}))
@@ -67,10 +69,11 @@ for i in range(1,2*n+1):
 	else: # These are "module" region
 		# Every block is named for its material in this case
 		water.append(b.Block('waterModule' + str(n-i/2),'water',T = 15,m = 3.2e-6))
-		air.append(b.Block('airModule' + str(n-i/2),'airVapor',T = 22.5,m = 0.5, mvapor = 0.0))
-		water[i].addSource(s.Source('const',T = 0.003))
-		water[i].addSource(s.Source('const',m = 1.e-7))
-		air[i].addSource(s.Source('const',m = 0.01, mvapor = 0.01))
+		air.append(b.Block('airModule' + str(n-i/2),'airVapor',T = 22.5,m = 0.5, mvapor = 0.01))
+		water[i].addSource(s.Source('const',m = -vaporrate))
+		water[i].addSource(s.Source('linear',T = -vaporrate*4.218))
+		air[i].addSource(s.Source('linear',T = -vaporrate*1.864))
+		air[i].addSource(s.Source('const',m = vaporrate, mvapor = vaporrate))
 
 
 
