@@ -46,9 +46,9 @@ class Block(object):
 	output(s):	None
 	"""
 
-	def __init__(self,s,m,t = 0,**initialStates):
+	def __init__(self,s,material,t = 0,**initialStates):
 		self.name = s
-		self.m = materials.__dict__.get(m,0)
+		self.m = materials.__dict__.get(material,0)
 		self.state = OrderedDict(initialStates)
 		self.F = []
 		self.S = []	
@@ -82,11 +82,20 @@ class Block(object):
 	sums over sources and fluxes to calculate the residual
 	"""
 	def R(self):
-		return reduce(lambda x, y: dict((k, v + y[k]) for k, v in x.iteritems()), \
-			[F.F() for F in self.F] + [S.S(self) for S in self.S])
+		# print "printing block R"
+		# self.printMe()
+		# # print [F.F() for F in self.F]
+		# # print [S.S(self) for S in self.S]
+		R = OrderedDict([(s,0) for s in self.state])
+		for d in [F.F() for F in self.F]+[S.S(self) for S in self.S]:
+			for s in d:
+				R[s] += d[s]
+		return R
+		# return reduce(lambda x, y: dict((k, v + y.get(k,0)) for k, v in x.iteritems()), \
+		# 	[F.F() for F in self.F] + [S.S(self) for S in self.S])
 
 	def printMe(self):
-		print self.name, [s + '=' + str(self.state[s]) for s in self.state]
+		print self.name, [s + '=' + str(self.state[s]) for s in self.state], self.m['name']
 
 
 if __name__ == "__main__":

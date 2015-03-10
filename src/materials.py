@@ -34,6 +34,14 @@ python materials.py
 
 """
 import numpy as np
+airVapor = \
+{
+	'name':'airVapor',
+	'type':'mixture',
+	'CpAir': lambda state = 0 : 1.005,
+	'CpVapor': lambda state = 0 : 1.864,
+	'hVap': lambda state = 0: 2260 #kJ/kg
+}
 constWater = \
 {
 	'name':'constWater',

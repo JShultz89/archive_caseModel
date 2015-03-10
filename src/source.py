@@ -38,7 +38,7 @@ class Source(object):
 	This is the constant source
 	"""
 	def const(self,b):
-		return dict([(state,self.p[state]) for state in b.state])
+		return dict([(state,self.p.get(state,0.0)) for state in b.state])
 
 	def time(self,b):
 		return dict([(state,self.p[state](b.t)) for state in b.state])

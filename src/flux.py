@@ -88,7 +88,20 @@ class Flux(object):
 	def heatConvection(self):
 		return {'T':self.B.mdot(self.B)*self.B.m['Cp'](self.B.state)*(self.B.state['T']-self.N.state['T'])}
 
+	def heatConvDripsWater(self):
+		return {'T':self.B.state['m']*self.B.m['Cp'](self.B.state)*(self.B.state['T']-self.N.state['T'])}
 
+	def heatConvDripsAirVapor(self):
+		# self.B.printMe()
+		# self.N.printMe()
+		mf =  self.B.state['mvapor']/self.B.state['m']
+		mfN = self.N.state['mvapor']/self.N.state['m']
+		h = (1.0-mf)*self.B.m['CpAir'](self.B.state)*self.B.state['T']+ mf*(self.B.m['hVap'](self.B.state)+self.B.m['CpVapor'](self.B.state)*self.B.state['T'])
+		hN = (1.0-mfN)*self.N.m['CpAir'](self.N.state)*self.N.state['T']+ mfN*(self.N.m['hVap'](self.N.state)+self.N.m['CpVapor'](self.N.state)*self.N.state['T'])
+		return {'T':self.B.state['m']*(h-hN)}
+
+	def massFlux(self):
+		return dict((s,(self.N.state[s]-self.B.state[s])) for s in self.B.state if s[0] == 'm')
 	def difference(self):
 		return dict((s,(self.N.state[s]-self.B.state[s])/self.G['d']) for s in self.B.state)
 
