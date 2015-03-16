@@ -53,40 +53,7 @@ h_{wa} & = & 4.823 \times 10^{-5} kW/(K m)\\
 h_{i} & = & 1.572 \times 10^{-4} kW/(K m)\\
 h_{e} & = & 4.837 \times 10^{-4} kW/(K m)\\
 \end{eqnarray}
-With Initial and Boundary Conditions of $T_{a,0} = 20 C, T_i = 25.0 C, T_e = 22.5 C$. At this point, we set $Q_a = 0$ as the surrounding air acts like a reservoir and its effect is currently minimal. Our inputs are $T_{w,0}$ and $Q_w$ from experimental data. We take experimental data from the file \texttt{nov25\_2.csv} located in the github repository. 
-
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.6\textwidth]{nov25.png}
-\caption{Comparison between experiment and model for 3 modules, water temperature in last module compared.}
-\end{figure}
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.6\textwidth]{nov25modules.png}
-\caption{Model results for 3 module case, using experimental inputs. Regions 2,4,6 correspond to modules.}
-\end{figure}
-\subsection{Feb 11 data}
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.6\textwidth]{feb11.png}
-\caption{Comparison between experiment and model for 6 modules, water temperature in last module compared for Feb 11th data. Each module has its own $Q_w$ from the data.}
-\end{figure}
-
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.6\textwidth]{feb11_oneblock.png}
-\caption{Same Comparison, in this case, regions 1-2, 3-4, etc are merged into one, as if the module is part of the general volume.}
-\end{figure}
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.6\textwidth]{feb11_2_4water.png}
-\caption{Same Comparison. In the model, the water flow rate is 2.4 times the number initially used. This gets closer to the experimental data.}
-\end{figure}
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.6\textwidth]{feb11_55.png}
-\caption{Same Comparison. In the model, the heat generated, $Q_w$ in each module is 55\% of the experimental number, suggesting better agreement if there is a loss of energy.}
-\end{figure}
+With Initial and Boundary Conditions of $T_{a,0} = 20 C, T_i = 25.0 C, T_e = 22.5 C$. At this point, we set $Q_a = 0$ as the surrounding air acts like a reservoir and its effect is currently minimal. Our inputs are $T_{w,0}$ and $Q_{w,i}$ from experimental data. We also occasionally have access to $T_{a,0}$, the ambient air temperature. 
 \clearpage
 \newpage 
 \section{Unsteady Model}
@@ -99,15 +66,7 @@ A_2: & & m_{a,2}C_{p,a}\frac{\partial T}{\partial t} +\dot{m}_aC_{p,a}(T_{a,2}-T
 \end{eqnarray}
 To handle the mass term, we need the volume. We have a length of the first tube as $L_1 = 0.15m$ and $L_{3,5,\ldots} = 0.3m$. The cross sectional area of the tube is based on inner diameter, $d = 0.003m$ and outer diameter of $d = 0.0142m$. The volume of the surrounding air we are interested in has a cross section of $0.4m \times 0.4m$. Using the density and the specific heat, we get that $m_a = 0.0576 kg$, $m_w = 2.12\times 10^{-3} kg$.
 
-For regions with modules, we can create a small volume, $m_{a,2,4,6,\ldots} \approx Cm_a$ and $m_{w,2,4,6,\ldots} Cm_w$. In these results, $C = 1/6$.
+For regions with modules, we can create a small volume, $m_{a,2,4,6,\ldots} \approx Cm_a$ and $m_{w,2,4,6,\ldots} Cm_w$. 
 
-\subsection{Feb 11 data}
-Using the Feb 11 data, given discrete data, we can determine $Q_w(t)$ for all times by quadratic interpolation. For the initial solution, we can set every 
-
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.6\textwidth]{Feb11_unst_10.png}
-\caption{Same Comparison. In the model, the heat generated, $Q_w$ in each module is 65\% of the experimental number. Initially they start out in agreement, and then diverge as time goes on. Quadratic interpolation of the data (inlet temp, heat generated).}
-\end{figure}
 \end{document}
 

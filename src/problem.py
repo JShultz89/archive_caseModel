@@ -107,8 +107,8 @@ class Problem(object):
 		# Solver, just live and let live	
 		for ix, (i,k) in enumerate(self.mapping):
 			solution[ix] = self.b[i].state[k]
+		soln = odeint(self.rUnst, solution, t,hmax=(t[-1]-t[0])/len(t),rtol = 1e-4, atol = 1e-4)
 
-		soln = odeint(self.rUnst, solution, t)
 		# final update
 		self.updateUnst(t[-1])
 		self.update(soln[-1,:])

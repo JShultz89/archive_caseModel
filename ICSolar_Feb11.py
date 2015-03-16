@@ -184,7 +184,3 @@ if __name__ == "__main__":
 		plt.title('Individual Region Temperatures')		
 		plt.savefig('feb11modules.png')
 		plt.close()
-
-
-	else:
-		print solve(float(sys.argv[1]),float(sys.argv[2]),int(sys.argv[3]))

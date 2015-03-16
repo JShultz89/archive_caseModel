@@ -38,7 +38,7 @@ from scipy.interpolate import interp1d
 from collections import defaultdict
 
 csvcol = defaultdict(list) 
-csvfile = open('Feb6.csv','rU')
+csvfile = open('data/ICSolar/Feb6.csv','rU')
 cr = csv.DictReader(csvfile)
 for row in cr: # read a row as {column1: value1, column2: value2,...}
   for (k,v) in row.items(): # go over each column name and value 

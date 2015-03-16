@@ -47,6 +47,7 @@ def solve(heatGen,waterTemp,n,flowrate):
 	# These are added to the class object, and are not part of the
 	# default block requirement
 	w0.mdot = flowrate*1.0e-6*w0.m['rho'](w0.state)
+	print w0.mdot
 	a0.mdot = 2.0*a0.m['rho'](a0.state)*0.16
 
 	# All these boundary blocks need are temperatures
