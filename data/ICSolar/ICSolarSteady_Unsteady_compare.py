@@ -7,7 +7,7 @@ from collections import defaultdict
 from subprocess import call
 from os import chdir
 if __name__ == "__main__":
-	basenames = ['Feb27','Feb28','Jan28','Mar06','Mar09']
+	basenames = ['Feb6','Feb11','Jan31']
 	for name in basenames:
 		expt = open(name+'.csv','rU')
 		unsteady = open('model/'+name+'_model_unsteady.csv','rU')
