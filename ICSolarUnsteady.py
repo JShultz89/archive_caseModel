@@ -185,8 +185,8 @@ if __name__ == "__main__":
 	soln = solve(data,numModules,start,end)
 	for i in range(0,end-start):
 		results = {}
-		results['Timestamp'] = data['Timestamp'][i]
-		results['exp_inlet'] = data['exp_inlet'][i]
+		results['Timestamp'] = data['Timestamp'][i+start]
+		results['exp_inlet'] = data['exp_inlet'][i+start]
 		for j in range(1,7):
 			data['m'+str(j)+'_in_mod'].append(soln['m'+str(j)+'_in_T'][i])
 			data['m'+str(j)+'_out_mod'].append(soln['m'+str(j)+'_out_T'][i])
