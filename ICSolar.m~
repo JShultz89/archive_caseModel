@@ -1,0 +1,8 @@
+syms ca cw hwin hwa
+A0 = diag([cw,ca]);
+A1 = [hwa, -hwa; -hwa, hwa+hwin];
+Z = zeros(2,2);
+Z2 = zeros(4,4);
+B0 = [ A0+A1, Z; -A0, A0];
+B1 = [Z,-A0; Z Z];
+An = 

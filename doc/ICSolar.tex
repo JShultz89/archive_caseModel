@@ -1,11 +1,10 @@
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[top=60pt, bottom=60pt, left=70pt, right=70pt]{geometry}
-\usepackage{graphicx}
+\usepackage{graphicx,amsmath}
 % Default fixed font does not support bold face
 \DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{8} % for bold
 \DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{8}  % for normal
-\usepackage{pdflscape}
 % Custom colors
 \usepackage{color}
 \definecolor{deepblue}{rgb}{0,0,0.5}
@@ -76,19 +75,74 @@ W_2: &  \dot{m}_wC_{p,w}T_{w,2}-\dot{m}_wC_{p,w}T_{w,1} = &Q_w\\
 A_2: &  \dot{m}_aC_{p,a}T_{a,2}-\dot{m}_aC_{p,a}T_{a,1} = &Q_a
 \label{eq:steady2}
 \end{eqnarray}
-For a two module system, the system is as follows. The extension to additional modules is obvious
-\begin{landscape}
+% \begin{landscape}
 
-\begin{equation}
-\left[ \begin{array}{cccccccc} C_w+h_{wa}& - h_{wa} & 0 & 0 & 0 & 0 & 0 & 0 \\-h_{wa} & C_a+h_{win} & 0 & 0 & 0 & 0 & 0 & 0 \\ -C_w & 0 & C_w & 0 & 0 & 0 & 0 & 0 \\ 0 & -C_a & 0 & C_a & 0 & 0 & 0 & 0 \\ 0 & 0 & -C_w & 0 & C_w+h_{wa} & -h_{wa}& 0 & 0 \\ 0 & 0 & 0 & -C_a &  -h_{wa} & C_a+h_{win} & 0 & 0\\ 0 & 0 & 0 & 0 & -C_w & 0 & C_w & 0 \\ 0 & 0 & 0 & 0 & 0 & -C_a & 0 & C_a \end{array}\right]\left[ \begin{array}{l} T_{w,1} \\ T_{a,1} \\ T_{w,2} \\ T_{a,2} \\ T_{w,3} \\ T_{a,3} \\ T_{w,4} \\ T_{a,4} \end{array}\right] = \left[ \begin{array}{l} C_wT_{w,0} \\ C_aT_{a,0} + Q_{win} \\ Q_w \\ Q_a \\ 0 \\ Q_{win} \\ Q_w \\ Q_a\end{array}\right]
-\end{equation}
+% \begin{equation}
+% \left[ \begin{array}{cccccccc} C_w+h_{wa}& - h_{wa} & 0 & 0 & 0 & 0 & 0 & 0 \\-h_{wa} & C_a+h_{wa}+h_{win} & 0 & 0 & 0 & 0 & 0 & 0 \\ -C_w & 0 & C_w & 0 & 0 & 0 & 0 & 0 \\ 0 & -C_a & 0 & C_a & 0 & 0 & 0 & 0 \\ 0 & 0 & -C_w & 0 & C_w+h_{wa} & -h_{wa}& 0 & 0 \\ 0 & 0 & 0 & -C_a &  -h_{wa} & C_a+h_{wa}+h_{win} & 0 & 0\\ 0 & 0 & 0 & 0 & -C_w & 0 & C_w & 0 \\ 0 & 0 & 0 & 0 & 0 & -C_a & 0 & C_a \end{array}\right]\left[ \begin{array}{l} T_{w,1} \\ T_{a,1} \\ T_{w,2} \\ T_{a,2} \\ T_{w,3} \\ T_{a,3} \\ T_{w,4} \\ T_{a,4} \end{array}\right] = \left[ \begin{array}{l} C_wT_{w,0} \\ C_aT_{a,0} + Q_{win} \\ Q_w \\ Q_a \\ 0 \\ Q_{win} \\ Q_w \\ Q_a\end{array}\right]
+% \end{equation}
 
 \begin{eqnarray}
 C_w &=& \dot{m}_wC_{p,w} \\
 C_a &=& \dot{m}_aC_{p,a} \\
-h_{win} &=& h_{wa}+h_e+h_i \\
+h_{win} &=& h_e+h_i \\
 Q_{win} &=& h_eT_e+h_iT_i
 \end{eqnarray}
-\end{landscape}
+% \end{landscape}
+We can write this by defining $2\times2$ and $4\times4$ matrices along with a state vector 
+\begin{equation}
+\mathbf{x}_{i} = [T_{w,i}, T_{a,i},T_{w,i+1}, T_{a,i+1}]^T
+\end{equation} for $i = 1,\ldots n-1$, which corresponds to a tube/module pair, as
+\begin{eqnarray}
+\mathbf{A}_{0} & = &\left[ \begin{array}{cc}  C_w& 0 \\ 0 & C_a\end{array}\right] \\
+\mathbf{A}_{1} & = &\left[ \begin{array}{cc}  h_{wa}& - h_{wa} \\ -h_{wa} & h_{wa}+h_{win}\end{array}\right] \\
+\mathbf{B}_{0} & = &\left[ \begin{array}{cc}\mathbf{A}_{0}+\mathbf{A}_1 & \mathbf{0} \\
+-\mathbf{A}_{0} & \mathbf{A}_{0}\end{array}\right] \\
+\mathbf{B}_{-1} & = &\left[ \begin{array}{cc} \mathbf{0} & -\mathbf{A_0} \\ \mathbf{0} & \mathbf{0}\end{array}\right]
+\end{eqnarray}
+and writing the boundary condition as $\mathbf{b}_0 = [\mathbf{x}_0^T\mathbf{A}_{0},0,0]^T$, $\mathbf{x}_0 = [T_{w,0},T_{a,0}]^T$ and $\mathbf{b}_{i} = [0,Q_{win},Q_{w,i+1},Q_{a,i+1}]^T$ to get $\mathbf{A}_n\mathbf{x} = \mathbf{b}$ 
+% \begin{equation} 
+% \left[ \begin{array}{llllll} \mathbf{A}_{0}+\mathbf{A}_1 & \mathbf{0}  &  & &  &  \\
+% -\mathbf{A}_0 & \mathbf{A}_0 & \mathbf{0} &  &  & \\  & -\mathbf{A}_0 & \mathbf{A}_{0}+\mathbf{A}_1 & \mathbf{0} &  &  \\ &  & -\mathbf{A}_0 & \mathbf{A}_{0} &  \mathbf{0} &  \\ &  & & \ddots & \ddots &  \ddots \end{array}\right]
+% \end{equation}
+\begin{equation}
+\left[ \begin{array}{cccc}\mathbf{B}_{0} & & & \\ \mathbf{B}_{-1} & \mathbf{B}_{0}  & & \\ & \mathbf{B}_{-1} & \mathbf{B}_{0} & \\ & & \ddots & \ddots \end{array}\right]\left[ \begin{array}{c} \mathbf{x}_{1} \\ \mathbf{x}_{3} \\ \mathbf{x}_{5} \\ \vdots   \end{array}\right] = \left[ \begin{array}{c} \mathbf{b}_1  \\ \mathbf{b}_3 \\ \mathbf{b}_5 \\ \vdots \end{array}\right] + \left[ \begin{array}{c} \mathbf{b}_0 \\ \mathbf{0} \\ \mathbf{0} \\ \vdots \end{array}\right]
+\end{equation}
+The eigenvalues of the system can be obtained from $\mathbf{B}_0$, itself, with algebraic multiplicity of $n$ for $\mathbf{A}_n$ as
+\begin{equation}
+\lambda = C_w, C_a, \frac{1}{2}(C_a+C_w +h_{win}+2h_{wa}) \pm \frac{1}{2}\sqrt{(C_a-C_w)^2+2h_{win}(C_a-C_w+h_{win})+4h_{win}}
+\end{equation}
+and an obvious defectiveness of the eigenvalues leading to 4 linearly independent eigenvectors. To calculate the inverse of the system, introduce the matrix product 
+\begin{equation}
+\mathbf{C} = \mathbf{B}_{-1} \mathbf{B}_{0}^{-1} 
+\end{equation}
+We have that
+\begin{eqnarray}
+\mathbf{B}_{0}^{-1} & = &\left[ \begin{array}{cc}  (\mathbf{A}_0+\mathbf{A}_1)^{-1}& \mathbf{0} \\ (\mathbf{A}_0+\mathbf{A}_1)^{-1} & \mathbf{A}_{0}^{-1}\end{array}\right] \\
+\mathbf{C} & = &\left[ \begin{array}{cc}  -\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}& -\mathbf{I} \\ \mathbf{0}& \mathbf{0}\end{array}\right] \\
+\mathbf{B}_{0}^{-1}\mathbf{C} & = &\left[ \begin{array}{cc} -(\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}& -  (\mathbf{A}_0+\mathbf{A}_1)^{-1} \\  -(\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}& - (\mathbf{A}_0+\mathbf{A}_1)^{-1}\end{array}\right]\\
+\mathbf{B}_{0}^{-1}\mathbf{C}^n & = &\left[ \begin{array}{cc} -(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^n& -(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1}\\  -(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^n& -(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1}\end{array}\right]
+\end{eqnarray}
+% For the simplest case of
+% \begin{equation}
+% \mathbf{A}_2 = \left[ \begin{array}{cc}\mathbf{B}_{0} & \mathbf{0}\\ \mathbf{B}_{-1} & \mathbf{B}_{0}    \end{array}\right] 
+% \end{equation}
+% \begin{equation}
+% \mathbf{A}_2^{-1} = \left[ \begin{array}{cc}\mathbf{B}_{0}^{-1} & \mathbf{0} \\ -\mathbf{B}_{0}^{-1} \mathbf{B}_{-1}\mathbf{B}_{0}^{-1}  & \mathbf{B}_{0}^{-1}  \end{array}\right] 
+% \end{equation}
+Choosing row (or column) $i = 1,2,\ldots,n$, the general formula for $\mathbf{A}_{n}^{-1}$ is
+\begin{equation}
+\mathbf{A}_{n}^{-1} = \left[ \begin{array}{cccccc}\mathbf{B}_{0}^{-1} & & & & &  \\ -\mathbf{B}_{0}^{-1}\mathbf{C}  & \mathbf{B}_{0}^{-1} & & & & \\  \mathbf{B}_{0}^{-1}\mathbf{C}^2 & -\mathbf{B}_{0}^{-1}\mathbf{C}  &  \mathbf{B}_{0}^{-1} & & & \\ \vdots &  \ddots & \ddots & & & \\  (-1)^{i-1}\mathbf{B}_{0}^{-1}\mathbf{C}^{i-1} & \ldots&   -\mathbf{B}_{0}^{-1}\mathbf{C}& \mathbf{B}_0^{-1}&  & \\ \vdots &  &   & \ddots& \ddots& \\ (-1)^{n-1}\mathbf{B}_{0}^{-1}\mathbf{C}^{n-1} & & \ldots & & -\mathbf{B}_{0}^{-1}\mathbf{C}&\mathbf{B}_0^{-1} \end{array} \right] 
+\end{equation} 
+The solution to the system is then
+\begin{equation}
+\mathbf{x} = \mathbf{A}_n^{-1}\mathbf{b}
+\end{equation}
+which can be separated to give 
+\begin{equation}
+\mathbf{A}_n^{-1}\left[ \begin{array}{c} \mathbf{b}_0 \\ \mathbf{0} \\ \mathbf{0} \\ \vdots \end{array}\right] = \left[ \begin{array}{c} (\mathbf{A}_0+\mathbf{A}_1)^{-1} \\ (\mathbf{A}_0+\mathbf{A}_1)^{-1}  \\  (\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1} \\   (\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1} \\ \vdots  \\  (-1)^n(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1} \\  (-1)^n(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1} \end{array}\right]\mathbf{A_0}\mathbf{x}_0
+\end{equation}
+% \begin{equation}
+% \mathbf{A}_n^{-1}\left[ \begin{array}{c} \mathbf{b}_1  \\ \mathbf{b}_3 \\ \mathbf{b}_5 \\ \vdots \end{array}\right] 
+% \end{equation}
 \end{document}
 
