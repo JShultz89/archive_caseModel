@@ -1,0 +1,149 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[top=60pt, bottom=60pt, left=70pt, right=70pt]{geometry}
+\usepackage{graphicx,amsmath}
+% Default fixed font does not support bold face
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{8} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{8}  % for normal
+% Custom colors
+\usepackage{color}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\definecolor{commentgrey}{rgb}{0.5,0.5,0.5}
+\usepackage{listings}
+
+% Python style for highlighting
+\lstset{
+language=Python,
+basicstyle=\ttm,
+otherkeywords={self},             % Add keywords here
+keywordstyle=\ttb\color{deepblue},
+emph={MyClass,__init__},          % Custom highlighting
+emphstyle=\ttb\color{deepred},    % Custom highlighting style
+stringstyle=\color{deepgreen},
+frame=tb,                         % Any extra options here
+commentstyle=\color{commentsgrey}
+}
+
+
+\title{ICSolar Model}
+\author{Daniel W. Zaide}
+
+\begin{document}
+\maketitle
+\section{Steady Model}
+
+Consider the model of air and water interaction consisting of an initial inlet region (denoted by 0) and a pair of regions, an open region with pipe followed by a module, denoted by (1,2) satisfying 
+\begin{eqnarray} 
+W_1: & & \dot{m}_wC_{p,w}(T_{w,1}-T_{w,0}) - h_{wa}(T_{a,1}-T_{w,1}) = 0 \\
+A_1: & & \dot{m}_aC_{p,a}(T_{a,1}-T_{a,0}) - h_{wa}(T_{w,1}-T_{a,1}) - h_{e}(T_e-T_{a,1}) - h_{i}(T_i-T_{a,1})= 0 \\
+W_2: & & \dot{m}_wC_{p,w}(T_{w,2}-T_{w,1}) - Q_w = 0\\
+A_2: & & \dot{m}_aC_{p,a}(T_{a,2}-T_{a,1}) - Q_a = 0 
+\label{eq:steady}
+\end{eqnarray}
+Where $i$ and $e$ are interior and exterior contributions. Each pair of these forms a `module'. In this work, we use
+\begin{eqnarray}
+C_{p,w} & = & 4.218 kJ/(kg K) \\
+\dot{m}_w & = & 0.0008483 kg/s \\
+C_{p,a} & = & 1.005 kJ/(kg K) \\
+\dot{m}_a & = & 0.384 kg/s \\
+h_{wa} & = & 4.823 \times 10^{-5} kW/(K m)\\
+h_{i} & = & 1.572 \times 10^{-4} kW/(K m)\\
+h_{e} & = & 4.837 \times 10^{-4} kW/(K m)\\
+\end{eqnarray}
+With Initial and Boundary Conditions of $T_{a,0} = 20 C, T_i = 25.0 C, T_e = 22.5 C$. At this point, we set $Q_a = 0$ as the surrounding air acts like a reservoir and its effect is currently minimal. Our inputs are $T_{w,0}$ and $Q_{w,i}$ from experimental data. We also occasionally have access to $T_{a,0}$, the ambient air temperature. 
+\clearpage
+\newpage 
+\section{Unsteady Model}
+Consider the steady model in \ref{eq:steady} and introduce the time derivative, $mC_{p}\frac{\partial T}{\partial t}$ and rearrange to get 
+\begin{eqnarray} 
+W_1: & & m_{w,1}C_{p,w}\frac{\partial T}{\partial t} + \dot{m}_wC_{p,w}(T_{w,1}-T_{w,0}) - h_{wa}(T_{a,1}-T_{w,1}) = 0 \\
+W_2: & & m_{w,2}C_{p,w}\frac{\partial T}{\partial t} + \dot{m}_wC_{p,w}(T_{w,2}-T_{w,1}) - Q_w(t) = 0\\
+A_1: & & m_{a,1}C_{p,a}\frac{\partial T}{\partial t} + \dot{m}_aC_{p,a}(T_{a,1}-T_{a,0}) - h_{wa}(T_{w,1}-T_{a,1}) - h_{e}(T_e-T_{a,1}) - h_{i}(T_i-T_{a,1})= 0 \\
+A_2: & & m_{a,2}C_{p,a}\frac{\partial T}{\partial t} +\dot{m}_aC_{p,a}(T_{a,2}-T_{a,1}) - Q_a = 0 
+\end{eqnarray}
+To handle the mass term, we need the volume. We have a length of the first tube as $L_1 = 0.15m$ and $L_{3,5,\ldots} = 0.3m$. The cross sectional area of the tube is based on inner diameter, $d = 0.003m$ and outer diameter of $d = 0.0142m$. The volume of the surrounding air we are interested in has a cross section of $0.4m \times 0.4m$. Using the density and the specific heat, we get that $m_a = 0.0576 kg$, $m_w = 2.12\times 10^{-3} kg$.
+
+For regions with modules, we can create a small volume, $m_{a,2,4,6,\ldots} \approx Cm_a$ and $m_{w,2,4,6,\ldots} Cm_w$. 
+\section{Steady Model - Matrix Form}
+Lets write the equations in the form $\mathbf{A}\mathbf{x}=\mathbf{b}$
+\begin{eqnarray} 
+W_1: &  (\dot{m}_wC_{p,w}+h_{wa})T_{w,1} - h_{wa}T_{a,1} = &\dot{m}_wC_{p,w}T_{w,0}  \\
+A_1: &  (\dot{m}_aC_{p,a}+h_{wa}+h_e+h_i)T_{a,1} -h_{wa}T_{w,1} &= \dot{m}_aC_{p,a}T_{a,0} +h_eT_e+h_iT_i \\
+W_2: &  \dot{m}_wC_{p,w}T_{w,2}-\dot{m}_wC_{p,w}T_{w,1} = &Q_w\\
+A_2: &  \dot{m}_aC_{p,a}T_{a,2}-\dot{m}_aC_{p,a}T_{a,1} = &Q_a
+\label{eq:steady2}
+\end{eqnarray}
+% \begin{landscape}
+
+% \begin{equation}
+% \left[ \begin{array}{cccccccc} C_w+h_{wa}& - h_{wa} & 0 & 0 & 0 & 0 & 0 & 0 \\-h_{wa} & C_a+h_{wa}+h_{win} & 0 & 0 & 0 & 0 & 0 & 0 \\ -C_w & 0 & C_w & 0 & 0 & 0 & 0 & 0 \\ 0 & -C_a & 0 & C_a & 0 & 0 & 0 & 0 \\ 0 & 0 & -C_w & 0 & C_w+h_{wa} & -h_{wa}& 0 & 0 \\ 0 & 0 & 0 & -C_a &  -h_{wa} & C_a+h_{wa}+h_{win} & 0 & 0\\ 0 & 0 & 0 & 0 & -C_w & 0 & C_w & 0 \\ 0 & 0 & 0 & 0 & 0 & -C_a & 0 & C_a \end{array}\right]\left[ \begin{array}{l} T_{w,1} \\ T_{a,1} \\ T_{w,2} \\ T_{a,2} \\ T_{w,3} \\ T_{a,3} \\ T_{w,4} \\ T_{a,4} \end{array}\right] = \left[ \begin{array}{l} C_wT_{w,0} \\ C_aT_{a,0} + Q_{win} \\ Q_w \\ Q_a \\ 0 \\ Q_{win} \\ Q_w \\ Q_a\end{array}\right]
+% \end{equation}
+
+\begin{eqnarray}
+C_w &=& \dot{m}_wC_{p,w} \\
+C_a &=& \dot{m}_aC_{p,a} \\
+h_{win} &=& h_e+h_i \\
+Q_{win} &=& h_eT_e+h_iT_i
+\end{eqnarray}
+% \end{landscape}
+We can write this by defining $2\times2$ and $4\times4$ matrices along with a state vector 
+\begin{equation}
+\mathbf{x}_{i} = [T_{w,i}, T_{a,i},T_{w,i+1}, T_{a,i+1}]^T
+\end{equation} for $i = 1,\ldots n-1$, which corresponds to a tube/module pair, as
+\begin{eqnarray}
+\mathbf{A}_{0} & = &\left[ \begin{array}{cc}  C_w& 0 \\ 0 & C_a\end{array}\right] \\
+\mathbf{A}_{1} & = &\left[ \begin{array}{cc}  h_{wa}& - h_{wa} \\ -h_{wa} & h_{wa}+h_{win}\end{array}\right] \\
+\mathbf{B}_{0} & = &\left[ \begin{array}{cc}\mathbf{A}_{0}+\mathbf{A}_1 & \mathbf{0} \\
+-\mathbf{A}_{0} & \mathbf{A}_{0}\end{array}\right] \\
+\mathbf{B}_{-1} & = &\left[ \begin{array}{cc} \mathbf{0} & -\mathbf{A_0} \\ \mathbf{0} & \mathbf{0}\end{array}\right]
+\end{eqnarray}
+and writing the boundary condition as $\mathbf{b}_0 = [\mathbf{x}_0^T\mathbf{A}_{0},0,0]^T$, $\mathbf{x}_0 = [T_{w,0},T_{a,0}]^T$ and $\mathbf{b}_{i} = [0,Q_{win},Q_{w,i+1},Q_{a,i+1}]^T$ to get $\mathbf{A}_n\mathbf{x} = \mathbf{b}$ 
+% \begin{equation} 
+% \left[ \begin{array}{llllll} \mathbf{A}_{0}+\mathbf{A}_1 & \mathbf{0}  &  & &  &  \\
+% -\mathbf{A}_0 & \mathbf{A}_0 & \mathbf{0} &  &  & \\  & -\mathbf{A}_0 & \mathbf{A}_{0}+\mathbf{A}_1 & \mathbf{0} &  &  \\ &  & -\mathbf{A}_0 & \mathbf{A}_{0} &  \mathbf{0} &  \\ &  & & \ddots & \ddots &  \ddots \end{array}\right]
+% \end{equation}
+\begin{equation}
+\left[ \begin{array}{cccc}\mathbf{B}_{0} & & & \\ \mathbf{B}_{-1} & \mathbf{B}_{0}  & & \\ & \mathbf{B}_{-1} & \mathbf{B}_{0} & \\ & & \ddots & \ddots \end{array}\right]\left[ \begin{array}{c} \mathbf{x}_{1} \\ \mathbf{x}_{3} \\ \mathbf{x}_{5} \\ \vdots   \end{array}\right] = \left[ \begin{array}{c} \mathbf{b}_1  \\ \mathbf{b}_3 \\ \mathbf{b}_5 \\ \vdots \end{array}\right] + \left[ \begin{array}{c} \mathbf{b}_0 \\ \mathbf{0} \\ \mathbf{0} \\ \vdots \end{array}\right]
+\end{equation}
+The eigenvalues of the system can be obtained from $\mathbf{B}_0$, itself, with algebraic multiplicity of $n$ for $\mathbf{A}_n$ as
+\begin{equation}
+\lambda = C_w, C_a, \frac{1}{2}(C_a+C_w +h_{win}+2h_{wa}) \pm \frac{1}{2}\sqrt{(C_a-C_w)^2+2h_{win}(C_a-C_w+h_{win})+4h_{win}}
+\end{equation}
+and an obvious defectiveness of the eigenvalues leading to 4 linearly independent eigenvectors. To calculate the inverse of the system, introduce the matrix product 
+\begin{equation}
+\mathbf{C} = \mathbf{B}_{-1} \mathbf{B}_{0}^{-1} 
+\end{equation}
+We have that
+\begin{eqnarray}
+\mathbf{B}_{0}^{-1} & = &\left[ \begin{array}{cc}  (\mathbf{A}_0+\mathbf{A}_1)^{-1}& \mathbf{0} \\ (\mathbf{A}_0+\mathbf{A}_1)^{-1} & \mathbf{A}_{0}^{-1}\end{array}\right] \\
+\mathbf{C} & = &\left[ \begin{array}{cc}  -\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}& -\mathbf{I} \\ \mathbf{0}& \mathbf{0}\end{array}\right] \\
+\mathbf{B}_{0}^{-1}\mathbf{C} & = &\left[ \begin{array}{cc} -(\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}& -  (\mathbf{A}_0+\mathbf{A}_1)^{-1} \\  -(\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}& - (\mathbf{A}_0+\mathbf{A}_1)^{-1}\end{array}\right]\\
+\mathbf{B}_{0}^{-1}\mathbf{C}^n & = &\left[ \begin{array}{cc} -(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^n& -(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1}\\  -(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^n& -(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1}\end{array}\right]
+\end{eqnarray}
+% For the simplest case of
+% \begin{equation}
+% \mathbf{A}_2 = \left[ \begin{array}{cc}\mathbf{B}_{0} & \mathbf{0}\\ \mathbf{B}_{-1} & \mathbf{B}_{0}    \end{array}\right] 
+% \end{equation}
+% \begin{equation}
+% \mathbf{A}_2^{-1} = \left[ \begin{array}{cc}\mathbf{B}_{0}^{-1} & \mathbf{0} \\ -\mathbf{B}_{0}^{-1} \mathbf{B}_{-1}\mathbf{B}_{0}^{-1}  & \mathbf{B}_{0}^{-1}  \end{array}\right] 
+% \end{equation}
+Choosing row (or column) $i = 1,2,\ldots,n$, the general formula for $\mathbf{A}_{n}^{-1}$ is
+\begin{equation}
+\mathbf{A}_{n}^{-1} = \left[ \begin{array}{cccccc}\mathbf{B}_{0}^{-1} & & & & &  \\ -\mathbf{B}_{0}^{-1}\mathbf{C}  & \mathbf{B}_{0}^{-1} & & & & \\  \mathbf{B}_{0}^{-1}\mathbf{C}^2 & -\mathbf{B}_{0}^{-1}\mathbf{C}  &  \mathbf{B}_{0}^{-1} & & & \\ \vdots &  \ddots & \ddots & & & \\  (-1)^{i-1}\mathbf{B}_{0}^{-1}\mathbf{C}^{i-1} & \ldots&   -\mathbf{B}_{0}^{-1}\mathbf{C}& \mathbf{B}_0^{-1}&  & \\ \vdots &  &   & \ddots& \ddots& \\ (-1)^{n-1}\mathbf{B}_{0}^{-1}\mathbf{C}^{n-1} & & \ldots & & -\mathbf{B}_{0}^{-1}\mathbf{C}&\mathbf{B}_0^{-1} \end{array} \right] 
+\end{equation} 
+The solution to the system is then
+\begin{equation}
+\mathbf{x} = \mathbf{A}_n^{-1}\mathbf{b}
+\end{equation}
+which can be separated to give 
+\begin{equation}
+\mathbf{A}_n^{-1}\left[ \begin{array}{c} \mathbf{b}_0 \\ \mathbf{0} \\ \mathbf{0} \\ \vdots \end{array}\right] = \left[ \begin{array}{c} (\mathbf{A}_0+\mathbf{A}_1)^{-1} \\ (\mathbf{A}_0+\mathbf{A}_1)^{-1}  \\  (\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1} \\   (\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1} \\ \vdots  \\  (-1)^n(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1} \\  (-1)^n(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1} \end{array}\right]\mathbf{A_0}\mathbf{x}_0
+\end{equation}
+To do basic uncertainty quantification, assume we have $\mathbf{b}_i =$ 
+% \begin{equation}
+% \mathbf{A}_n^{-1}\left[ \begin{array}{c} \mathbf{b}_1  \\ \mathbf{b}_3 \\ \mathbf{b}_5 \\ \vdots \end{array}\right] 
+% \end{equation}
+\end{document}
+

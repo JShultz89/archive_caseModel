@@ -1,0 +1,7 @@
+#!/bin/sh
+echo "running post commit"
+git checkout gh-pages
+git rebase master
+jekyll build
+git checkout master
+
