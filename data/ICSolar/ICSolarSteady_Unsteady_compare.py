@@ -62,15 +62,15 @@ if __name__ == "__main__":
 		os.chdir('../../_posts/')
 		mdfilename = time.strftime("%Y-%m-%d")+'-Comparison_'+name+'.md'
 		mdfile = open(mdfilename,'w')
-		header = ['---','layout: default','title: Comparison of data on '+name,
+		header = ['---','layout: post','title: Comparison of data on '+name,
 			'---', 'h2. {{ page.title }}']
 
 		for item in header:
 			mdfile.write(item+'\n')
 		mdfile.write('\n')
 		for i in range(6,0,-1):
-			mdfile.write('![Results]({{ site.baseurl }}images/ICSolar/' + name+'_m'+str(i)+'_in_compare.png)')
-			mdfile.write('![Results]({{ site.baseurl }}images/ICSolar/' + name+'_m'+str(i)+'_out_compare.png)\n')
+			mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + name+'_m'+str(i)+'_in_compare.png)\n\n')
+			mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + name+'_m'+str(i)+'_out_compare.png)\n\n')
 
 		mdfile.close()
 		os.chdir('../data/ICSolar')
