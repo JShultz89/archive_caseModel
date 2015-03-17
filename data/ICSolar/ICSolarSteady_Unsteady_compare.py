@@ -42,7 +42,7 @@ if __name__ == "__main__":
 			fig = plt.gcf()
 			fig.set_size_inches(4,4)
 
-			plt.savefig('../../doc/ICSolar/images/' + name+'_m'+str(j)+'_out_compare.png')		
+			plt.savefig('../../images/ICSolar/' + name+'_m'+str(j)+'_out_compare.png')		
 			plt.close()
 
 			plt.plot(t,data['exp']['exp_inlet'][start:end],linewidth=2.0,label='Inlet')
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 			plt.title(filename[:-4]+' m'+str(j)+'_in')
 			fig = plt.gcf()
 			fig.set_size_inches(4,4)
-			plt.savefig('../../doc/ICSolar/images/' + name+'_m'+str(j)+'_in_compare.png')
+			plt.savefig('../../images/ICSolar/' + name+'_m'+str(j)+'_in_compare.png')
 			plt.close()
 
 			# lets do this manually
@@ -69,8 +69,8 @@ if __name__ == "__main__":
 			mdfile.write(item+'\n')
 		mdfile.write('\n')
 		for i in range(6,0,-1):
-			mdfile.write('![Test]({{ site.url }}../data/ICSolar/images/' + name+'_m'+str(i)+'_in_compare.png)')
-			mdfile.write('![Test]({{ site.url }}../data/ICSolar/images/' + name+'_m'+str(i)+'_out_compare.png)')
+			mdfile.write('![Test]({{ site.url }}/images/ICSolar/' + name+'_m'+str(i)+'_in_compare.png)')
+			mdfile.write('![Test]({{ site.url }}/images/ICSolar/' + name+'_m'+str(i)+'_out_compare.png)')
 
 		mdfile.close()
 		os.chdir('../data/ICSolar')
