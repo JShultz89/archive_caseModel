@@ -69,8 +69,8 @@ if __name__ == "__main__":
 			mdfile.write(item+'\n')
 		mdfile.write('\n')
 		for i in range(6,0,-1):
-			mdfile.write('![Test]({{ site.url }}/images/ICSolar/' + name+'_m'+str(i)+'_in_compare.png)')
-			mdfile.write('![Test]({{ site.url }}/images/ICSolar/' + name+'_m'+str(i)+'_out_compare.png)')
+			mdfile.write('![Results]({{ site.url }}/images/ICSolar/' + name+'_m'+str(i)+'_in_compare.png)')
+			mdfile.write('![Results]({{ site.url }}/images/ICSolar/' + name+'_m'+str(i)+'_out_compare.png)\n')
 
 		mdfile.close()
 		os.chdir('../data/ICSolar')
