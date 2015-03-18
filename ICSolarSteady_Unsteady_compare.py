@@ -10,6 +10,9 @@ from os import chdir
 if __name__ == "__main__":
 	basenames = ['Jan28','Jan31','Feb6','Feb11','Feb27','Feb28','Mar06','Mar09']
 	for name in basenames:
+
+	os.chdir('data/ICSolar')
+	for name in basenames:
 		expt = open(name+'.csv','rU')
 		unsteady = open('model/'+name+'_model_unsteady.csv','rU')
 		steady = open('model/'+name+'_model.csv','rU')
@@ -63,7 +66,7 @@ if __name__ == "__main__":
 		mdfilename = time.strftime("%Y-%m-%d")+'-Comparison_'+name+'.md'
 		mdfile = open(mdfilename,'w')
 		header = ['---','layout: post','title: Comparison of data on '+name,
-			'---', 'h2. {{ page.title }}']
+			'---', '{{ page.title }}','-----------------', 'With h_{wa} = ']
 
 		for item in header:
 			mdfile.write(item+'\n')

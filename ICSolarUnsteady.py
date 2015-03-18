@@ -157,8 +157,10 @@ def solve(data,n,start,end):
 	soln = ICSolar.solveUnst(timesteps[start:end])
 	print (clock() - starttime)/len(timesteps[start:end]), " seconds per timestep"
 	return soln
+
 if __name__ == "__main__":
 	filename = sys.argv[1]
+	hwa = sys.argv[2]
 	csvfile = open(filename,'rU')
 	csvwrite = open(os.path.dirname(filename)+'/model/' + os.path.basename(filename)[:-4]+ \
 		'_model_unsteady.csv','w')
@@ -198,61 +200,61 @@ if __name__ == "__main__":
 
 
 	
-	for j in range(1,7):
-		plt.plot(soln['t'],data['exp_inlet'][start:end],linewidth=2.0,label='Inlet')
-		plt.plot(soln['t'],data['m'+str(j)+'_out'][start:end],linewidth=2.0,label='Expt')
-		plt.plot(soln['t'],data['m'+str(j)+'_out_mod'][0:(end-start)],linewidth=2.0,label='Model')
-		plt.legend(loc=0)
-		plt.xlabel('Measurement number (~timesteps)')
-		plt.ylabel('Temperature (C)')
-		plt.title(filename[:-4]+' m'+str(j)+'_out')
-		fig = plt.gcf()
-		fig.set_size_inches(4,4)
+	# for j in range(1,7):
+	# 	plt.plot(soln['t'],data['exp_inlet'][start:end],linewidth=2.0,label='Inlet')
+	# 	plt.plot(soln['t'],data['m'+str(j)+'_out'][start:end],linewidth=2.0,label='Expt')
+	# 	plt.plot(soln['t'],data['m'+str(j)+'_out_mod'][0:(end-start)],linewidth=2.0,label='Model')
+	# 	plt.legend(loc=0)
+	# 	plt.xlabel('Measurement number (~timesteps)')
+	# 	plt.ylabel('Temperature (C)')
+	# 	plt.title(filename[:-4]+' m'+str(j)+'_out')
+	# 	fig = plt.gcf()
+	# 	fig.set_size_inches(4,4)
 
-		plt.savefig(os.path.dirname(filename)+'/images/' + os.path.basename(filename)[:-4]+'_m'+str(j)+'_out_unsteady.pdf')		
-		plt.close()
+	# 	plt.savefig(os.path.dirname(filename)+'/images/' + os.path.basename(filename)[:-4]+'_m'+str(j)+'_out_unsteady.pdf')		
+	# 	plt.close()
 
-		plt.plot(soln['t'],data['exp_inlet'][start:end],linewidth=2.0,label='Inlet')
-		plt.plot(soln['t'],data['m'+str(j)+'_in'][start:end],linewidth=2.0,label='Expt')
-		plt.plot(soln['t'],data['m'+str(j)+'_in_mod'][0:(end-start)],linewidth=2.0,label='Model')
+	# 	plt.plot(soln['t'],data['exp_inlet'][start:end],linewidth=2.0,label='Inlet')
+	# 	plt.plot(soln['t'],data['m'+str(j)+'_in'][start:end],linewidth=2.0,label='Expt')
+	# 	plt.plot(soln['t'],data['m'+str(j)+'_in_mod'][0:(end-start)],linewidth=2.0,label='Model')
 
-		plt.legend(loc=0)
-		plt.xlabel('Measurement number (~timesteps)')
-		plt.ylabel('Temperature (C)')
-		plt.title(filename[:-4]+' m'+str(j)+'_in')
-		fig = plt.gcf()
-		fig.set_size_inches(4,4)
-		plt.savefig(os.path.dirname(filename)+'/images/' + os.path.basename(filename)[:-4]+'_m'+str(j)+'_in_unsteady.pdf')
-		plt.close()
+	# 	plt.legend(loc=0)
+	# 	plt.xlabel('Measurement number (~timesteps)')
+	# 	plt.ylabel('Temperature (C)')
+	# 	plt.title(filename[:-4]+' m'+str(j)+'_in')
+	# 	fig = plt.gcf()
+	# 	fig.set_size_inches(4,4)
+	# 	plt.savefig(os.path.dirname(filename)+'/images/' + os.path.basename(filename)[:-4]+'_m'+str(j)+'_in_unsteady.pdf')
+	# 	plt.close()
 
-		# lets do this manually
-	chdir('doc/ICSolar')
-	texfilename = 'Unsteady_'+os.path.basename(filename)[:-4]+'.tex'
-	texfile = open(texfilename,'w')
-	header = ['\documentclass{article}',
-	'\\usepackage[top=50pt, bottom=50pt, left=60pt, right=60pt]{geometry}',
-	'\\usepackage{graphicx}', 
-	'\\usepackage[bottom]{footmisc}',
-	'\\usepackage{enumerate,verbatim}',
-	'\\usepackage{amssymb,amsmath,ulem,amsthm}',
-	'\\usepackage{transparent,float}']
+	# 	# lets do this manually
+	# chdir('doc/ICSolar')
+	# texfilename = 'Unsteady_'+os.path.basename(filename)[:-4]+'.tex'
+	# texfile = open(texfilename,'w')
+	# header = ['\documentclass{article}',
+	# '\\usepackage[top=50pt, bottom=50pt, left=60pt, right=60pt]{geometry}',
+	# '\\usepackage{graphicx}', 
+	# '\\usepackage[bottom]{footmisc}',
+	# '\\usepackage{enumerate,verbatim}',
+	# '\\usepackage{amssymb,amsmath,ulem,amsthm}',
+	# '\\usepackage{transparent,float}']
 
-	for item in header:
-		texfile.write(item+'\n')
-	texfile.write('\\begin{document}\n')
-	for i in range(6,0,-1):
-		texfile.write('\\begin{figure}[!ht]\n')
-		texfile.write('\\centering\n')
-		texfile.write('\\includegraphics[width=0.4\\textwidth]{../../'+\
-			os.path.dirname(filename)+'/'+'images/' + os.path.basename(filename)[:-4]+'_m'+str(i)+\
-			'_in_unsteady.pdf}\hspace{0.05\\textwidth}\n')
-		texfile.write('\\includegraphics[width=0.4\\textwidth]{../../'+\
-			os.path.dirname(filename)+'/'+'images/' + os.path.basename(filename)[:-4]+'_m'+str(i)+\
-			'_out_unsteady.pdf}\hspace{0.05\\textwidth}\\\\\n')
-		texfile.write('\\caption{'+'Results for Module '+str(i)+'.}')	              
-		texfile.write('\\end{figure}\n')
-		if(i == 5 or i == 3):
-			texfile.write('\\clearpage\n')    
-	texfile.write('\end{document}\n')
-	texfile.close()
-	call('pdflatex '+texfilename+'>/dev/null',shell=True)
+	# for item in header:
+	# 	texfile.write(item+'\n')
+	# texfile.write('\\begin{document}\n')
+	# for i in range(6,0,-1):
+	# 	texfile.write('\\begin{figure}[!ht]\n')
+	# 	texfile.write('\\centering\n')
+	# 	texfile.write('\\includegraphics[width=0.4\\textwidth]{../../'+\
+	# 		os.path.dirname(filename)+'/'+'images/' + os.path.basename(filename)[:-4]+'_m'+str(i)+\
+	# 		'_in_unsteady.pdf}\hspace{0.05\\textwidth}\n')
+	# 	texfile.write('\\includegraphics[width=0.4\\textwidth]{../../'+\
+	# 		os.path.dirname(filename)+'/'+'images/' + os.path.basename(filename)[:-4]+'_m'+str(i)+\
+	# 		'_out_unsteady.pdf}\hspace{0.05\\textwidth}\\\\\n')
+	# 	texfile.write('\\caption{'+'Results for Module '+str(i)+'.}')	              
+	# 	texfile.write('\\end{figure}\n')
+	# 	if(i == 5 or i == 3):
+	# 		texfile.write('\\clearpage\n')    
+	# texfile.write('\end{document}\n')
+	# texfile.close()
+	# call('pdflatex '+texfilename+'>/dev/null',shell=True)
