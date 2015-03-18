@@ -10,16 +10,18 @@ import numpy as np
 import math
 if __name__ == "__main__":
 	basenames = ['Jan28','Jan31','Feb6','Feb11','Feb27','Feb28','Mar06','Mar09']
-	hlist = [0.01,0.1,0.5,0.75,1.0,1.25,1.5,1.75,2.0,5.0,10.0,100.0]
+	hlist = [0.1,1.0,2.0,5.0,7.5,10.0,15.0,20.0,25.0,100.0]
 
-	# for name in basenames:
-	# 	for h in hlist:
-	# 		print name, h
-	# 		call('python '+'ICSolar.py data/ICSolar/'+name+'.csv '+ str(h)+'>/dev/null',shell=True)
+	for name in basenames:
+		for h in hlist:
+			print name, h
+			call('python '+'ICSolar.py data/ICSolar/'+name+'.csv '+ str(h)+'>/dev/null',shell=True)
 
 	os.chdir('data/ICSolar')
+	normfile = open('Steady_norms.txt','w')
+
 	for name in basenames:
-		print name
+		normfile.write(name+'\n')
 		for h in hlist:
 			h = float(h)
 			expt = open(name+'.csv','rU')
@@ -79,7 +81,7 @@ if __name__ == "__main__":
 					 for i in range(0,numPoints)])
 					L2 = math.sqrt(L2/numPoints)
 					Linf = max([abs(data['exp']['m'+str(j)+'_out'][i]-data['st']['m'+str(j)+'_out'][i]) for i in range(0,numPoints)])
-					print "h ", h, " L2 ", L2, " Linf ", Linf
+					normfile.write("h "+str(h)+" L2 "+ str(L2)+" Linf "+str(Linf)+'\n')
 				plt.legend(loc=0)
 				plt.xlabel('Time (seconds)')
 				plt.ylabel('Temperature (C)')
@@ -95,7 +97,7 @@ if __name__ == "__main__":
 			os.chdir('../../_posts/')
 			mdfilename = time.strftime("%Y-%m-%d")+'-Steady_'+name+'_'+str(int(round(h*100)))+'.md'
 			mdfile = open(mdfilename,'w')
-			header = ['---','layout: post','title: Comparison of data on '+name,
+			header = ['---','layout: post','title: Comparison of data on '+name +' '+str(h),
 				'---', '{{ page.title }}','-----------------', 'With h_{wa} = '+str(h*0.16*0.3)]
 
 			for item in header:
@@ -113,3 +115,4 @@ if __name__ == "__main__":
 
 			mdfile.close()
 			os.chdir('../data/ICSolar')
+	normfile.close()

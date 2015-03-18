@@ -22,9 +22,12 @@ invB0C = [-invA01*A0*invA01, -invA01;
     -invA01*A0*invA01, -invA01];
 invAn = [invB0 zeros(4,4*(n-1));
     zeros(4*(n-1),4*(n))];
-for j = 0:(n-1)
-    for i = 1:n
-        ind = ((i-1)*4+1):i*4;
-        invAn(ind,ind-j*4) = invB0;
+size(invAn)
+for i = 1:n
+    for j = 1
+        ind = ((i-1)*4+1):i*4
+        ind1 = ind+(j-1)*4
+        invAn(ind,ind) = invB0;
     end
 end
+size(invAn)
