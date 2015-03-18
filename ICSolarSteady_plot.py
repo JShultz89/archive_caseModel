@@ -10,8 +10,8 @@ import numpy as np
 import math
 if __name__ == "__main__":
 	basenames = ['Jan28','Jan31','Feb6','Feb11','Feb27','Feb28','Mar06','Mar09']
-	hlist = [0.1,1.0,2.0,5.0,7.5,10.0,15.0,20.0,25.0,100.0]
-
+	# hlist = [0.1,1.0,2.0,5.0,7.5,10.0,15.0,20.0,25.0,100.0]
+	hlist = [25.0]
 	for name in basenames:
 		for h in hlist:
 			print name, h
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 				plt.plot(t,data['exp']['m'+str(j)+'_out'],linewidth=2.0,label='Expt')
 				plt.plot(t,data['st']['m'+str(j)+'_out'],linewidth=2.0,label='Model')
 				plt.plot(t,data['exp']['exp_inlet'],linewidth=2.0,label='Inlet')
-				if (j == 6):
+				if (j == 1):
 					L2 = sum([(data['exp']['m'+str(j)+'_out'][i]-data['st']['m'+str(j)+'_out'][i])*(data['exp']['m'+str(j)+'_out'][i]-data['st']['m'+str(j)+'_out'][i])
 					 for i in range(0,numPoints)])
 					L2 = math.sqrt(L2/numPoints)
