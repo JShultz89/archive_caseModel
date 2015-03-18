@@ -110,8 +110,8 @@ if __name__ == "__main__":
 					name+'_'+str(int(round(h*100)))+'_Q.png)\n\n')
 			# for i in range(6,0,-1):
 			for i in [int(6),int(1)]:
-				mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
-					name+'_m'+str(i)+'_in_steady_'+str(int(round(h*100)))+'.png) ')
+				# mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
+				# 	name+'_m'+str(i)+'_in_steady_'+str(int(round(h*100)))+'.png) ')
 				mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
 					name+'_m'+str(i)+'_out_steady_'+str(int(round(h*100)))+'.png)\n\n')
 
