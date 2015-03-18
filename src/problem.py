@@ -84,13 +84,15 @@ class Problem(object):
 
 	unwraps blocks, passes into solver, finishes by updating blocks one last time
 	""",
-	def solve(self,t=0):
+	def solve(self,t=0,jacobian=False):
 		self.updateUnst(t)
 		solution = [None]*len(self.mapping)
 		for ix, (i,k) in enumerate(self.mapping):
 			solution[ix] = self.b[i].state[k]
-		solution = fsolve(self.r, solution)
+		solution = fsolve(self.r, solution,full_output=jacobian)
+		
 		self.update(solution)
+		# return output['infodict']
 	"""
 	solveUnst:	solve the transient problem
 

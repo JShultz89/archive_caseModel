@@ -108,7 +108,7 @@ if __name__ == "__main__":
 			fig = plt.gcf()
 			fig.set_size_inches(5,5)
 			axes = plt.gca()
-			axes.set_ylim([20,100])
+			axes.set_ylim([20,30])
 			plt.savefig('../../images/ICSolar/' + name+'_air'+str(j)+'_in_steady_'+ext+'.png')		
 			plt.close()
 
@@ -123,7 +123,7 @@ if __name__ == "__main__":
 			fig = plt.gcf()
 			fig.set_size_inches(5,5)
 			axes = plt.gca()
-			axes.set_ylim([20,100])
+			axes.set_ylim([20,30])
 			plt.savefig('../../images/ICSolar/' + name+'_air'+str(j)+'_out_steady_'+ext+'.png')
 			plt.close()
 
