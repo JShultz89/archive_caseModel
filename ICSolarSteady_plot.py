@@ -98,7 +98,7 @@ if __name__ == "__main__":
 			
 			mdfilename = time.strftime("%Y-%m-%d")+'-Min_Steady_'+name+'_'+str(int(round(h*100)))+'.md'
 			mdfile = open(mdfilename,'w')
-			header = ['---','layout: post','title: Comparison of data on '+name +' '+str(h),
+			header = ['---','layout: post','title: A minimal Comparison of data on '+name +' '+str(h),
 				'---', '{{ page.title }}','-----------------', 'With h_{wa} = '+str(h*0.16*0.3)]
 
 			for item in header:
