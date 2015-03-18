@@ -45,7 +45,7 @@ def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,hwa):
 	w0 = b.Block('waterInlet','constWater',T = waterTemp)
 
 	# define inlet air with initial state
-	a0 = b.Block('airInlet','constAir',T = 28)
+	a0 = b.Block('airInlet','constAir',T = airTemp)
 
 	# We will need mass flow rates for our fluxes, so initialize them here
 	# These are added to the class object, and are not part of the
@@ -70,27 +70,27 @@ def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,hwa):
 	L = 0.3
 	#### Initialize the blocks we will solve on
 	for i in range(1,2*n+1):
-
 		if(i % 2 == 1): # odd regions are "tube" regions
+			hh = hwa
 			# Every block is named for its material in this case
 			water.append(b.Block('m' + str(n-i/2)+'_in','constWater',T = waterTemp))
-			air.append(b.Block('airTube' + str(n-i/2),'constAir',T = airTemp))
+			air.append(b.Block('air' + str(n-i/2)+'_in','constAir',T = airTemp))
 			# Water tube has one flux for heat conduction
 			if( i == 1 ): 
-				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':L/2.0,'scale':hwa}))
+				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':L/2.0,'scale':hh}))
 				# Air has three, corresponding to the windows and the water-tube
-				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':L/2.0,'scale':hwa}))
+				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':L/2.0,'scale':hh}))
 				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':L/2.0}))
 				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':L/2.0}))
 			else:
-				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':L,'scale':hwa}))
-				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':L,'scale':hwa}))
-				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':L,'scale':hwa}))
+				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':L,'scale':hh}))
+				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':L,'scale':hh}))
+				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':L}))
 				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':L}))
 		else: # These are "module" region
 			# Every block is named for its material in this case
 			water.append(b.Block('m' + str(n-i/2+1)+'_out','water',T = waterTemp))
-			air.append(b.Block('airModule' + str(n-i/2+1),'air',T = airTemp))
+			air.append(b.Block('air' + str(n-i/2+1)+'_out','air',T = airTemp))
 			water[i].addSource(s.Source('const',T = -heatGen[n-i/2]*1e-3))
 			air[i].addSource(s.Source('const',T = 0.0))
 
@@ -111,17 +111,22 @@ def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,hwa):
 	ICSolar = p.Problem(air[1::]+water[1::])
 	ICSolar.solve()
 
-	waterTemp = {}
+	Temp = {}
 	for ww in water[1::]:
-		waterTemp[ww.name] = ww.state['T']
-	return waterTemp
+		Temp[ww.name] = ww.state['T']
+	for aa in air[1::]:
+		Temp[aa.name] = aa.state['T']
+	return Temp
 	
 if __name__ == "__main__":
 	filename = sys.argv[1]
-	hwa = float(sys.argv[2])
+	if (len(sys.argv) > 2):
+		hwa = float(sys.argv[2])
+	else:
+		hwa = 2.0
 	csvfile = open(filename,'rU')
 	csvwrite = open(os.path.dirname(filename)+'/model/' + os.path.basename(filename)[:-4]+ \
-		'_model_'+str(int(round(hwa*100)))+'.csv','w')
+		'_model_'+'.csv','w')
 	cr = csv.DictReader(csvfile)
 	# read in all the data
 	data = defaultdict(list) 
@@ -134,12 +139,16 @@ if __name__ == "__main__":
 	for i in range(6,0,-1):
 		csvHeader.append('m'+str(i)+'_in')
 		csvHeader.append('m'+str(i)+'_out')
+		csvHeader.append('air'+str(i)+'_in')
+		csvHeader.append('air'+str(i)+'_out')
 		data['m'+str(i)+'_in_mod'] = [];
 		data['m'+str(i)+'_out_mod'] = [];
+		data['air'+str(i)+'_in_mod'] = [];
+		data['air'+str(i)+'_out_mod'] = [];
 	cw = csv.DictWriter(csvwrite,csvHeader)
 	cw.writeheader()
 	# for each line, run the data
-
+	print data.keys()
 	numDataPoints = len(data['Timestamp'])
 	for i in range(0,numDataPoints):
 		airTemp = 22.5
@@ -151,9 +160,12 @@ if __name__ == "__main__":
 		results = solve(heatGen,waterTemp,waterFlowRate,airTemp,numModules,hwa)
 		results['Timestamp'] = data['Timestamp'][i]
 		results['exp_inlet'] = data['exp_inlet'][i]
+
 		for j in range(1,7):
 			data['m'+str(j)+'_in_mod'].append(results['m'+str(j)+'_in'])
 			data['m'+str(j)+'_out_mod'].append(results['m'+str(j)+'_out'])
+			data['air'+str(j)+'_in_mod'].append(results['air'+str(j)+'_in'])
+			data['air'+str(j)+'_out_mod'].append(results['air'+str(j)+'_out'])
 		cw.writerow(results)
 	csvfile.close()
 	csvwrite.close()

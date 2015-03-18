@@ -137,13 +137,29 @@ The solution to the system is then
 \begin{equation}
 \mathbf{x} = \mathbf{A}_n^{-1}\mathbf{b}
 \end{equation}
-which can be separated to give 
-\begin{equation}
-\mathbf{A}_n^{-1}\left[ \begin{array}{c} \mathbf{b}_0 \\ \mathbf{0} \\ \mathbf{0} \\ \vdots \end{array}\right] = \left[ \begin{array}{c} (\mathbf{A}_0+\mathbf{A}_1)^{-1} \\ (\mathbf{A}_0+\mathbf{A}_1)^{-1}  \\  (\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1} \\   (\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1} \\ \vdots  \\  (-1)^n(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1} \\  (-1)^n(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1} \end{array}\right]\mathbf{A_0}\mathbf{x}_0
-\end{equation}
-To do basic uncertainty quantification, assume we have $\mathbf{b}_i =$ 
+% which can be separated to give 
 % \begin{equation}
-% \mathbf{A}_n^{-1}\left[ \begin{array}{c} \mathbf{b}_1  \\ \mathbf{b}_3 \\ \mathbf{b}_5 \\ \vdots \end{array}\right] 
+% \mathbf{A}_n^{-1}\left[ \begin{array}{c} \mathbf{b}_0 \\ \mathbf{0} \\ \mathbf{0} \\ \vdots \end{array}\right] = \left[ \begin{array}{c} (\mathbf{A}_0+\mathbf{A}_1)^{-1} \\ (\mathbf{A}_0+\mathbf{A}_1)^{-1}  \\  (\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1} \\   (\mathbf{A}_0+\mathbf{A}_1)^{-1}\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1} \\ \vdots  \\  (-1)^n(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1} \\  (-1)^n(\mathbf{A}_0+\mathbf{A}_1)^{-1}[\mathbf{A}_0(\mathbf{A}_0+\mathbf{A}_1)^{-1}]^{n-1} \end{array}\right]\mathbf{A_0}\mathbf{x}_0
 % \end{equation}
-\end{document}
+\section{Uncertainty Quantification}
+To do basic uncertainty quantification, llets define the heat generated as a uncorrelated gaussian random variable
+\begin{equation}
+Q_{w,i+1} = \bar{Q}_{w,i+1}+\tilde{Q}_{w,i+1}
+\end{equation}
+where $\tilde{Q}_{w,i+1}$ is a gaussian PDF with mean $0$ and variance $\sigma_{i+1}^2$ as
+\begin{equation}
+\tilde{Q}_{w,i+1} = \frac{1}{\sigma_{i+1} \sqrt{2\pi}}\exp\left[\frac{x^2}{2\sigma_{i+1}^2}\right]
+\end{equation}
+The covariance matrix of $\mathbf{b}$ is block diagonal, with each block containing
+\begin{equation}
+\left[ \begin{array}{cccc} 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 \\ 0 & 0 & \sigma_i^2 & 0\\ 0 & 0 & 0 & 0 \end{array} \right] \end{equation}
+The system can be written as 
+\begin{equation}
+\mathbf{A}_n\mathbf{x} = \mathbf{b}+\tilde{\mathbf{b}}
+\end{equation}
+and the solution can be written as a gaussian PDF with mean $\mathbf{A}_n^{-1}\bar{\mathbf{x}}$ and variance $\Sigma_x = \mathbf{A}_n^{-1}\Sigma_b \mathbf{A}_n^{-T}$. Using our equation for $\mathbf{A}_n^{-1}$ and noting that this is a Cholesky decomposition, and maintaining block form,
+\begin{eqnarray}
+\Sigma_x & = & \mathbf{A}_n^{-1}\Sigma_b \mathbf{A}_n^{-T} \\
+\Sigma_x & = & \mathbf{A}_n^{-1}\Sigma_b^{\frac{1}{2}}(\mathbf{A}_n^{-1}\Sigma_b^{\frac{1}{2}})^T\\
+\end{eqnarray}
 

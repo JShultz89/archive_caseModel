@@ -1,4 +1,5 @@
 syms ca cw hwin hwa
+
 A0 = diag([cw,ca]);
 A1 = [hwa, -hwa; -hwa, hwa+hwin];
 Z = zeros(2,2);
@@ -22,12 +23,17 @@ invB0C = [-invA01*A0*invA01, -invA01;
     -invA01*A0*invA01, -invA01];
 invAn = [invB0 zeros(4,4*(n-1));
     zeros(4*(n-1),4*(n))];
-size(invAn)
-for i = 1:n
-    for j = 1
-        ind = ((i-1)*4+1):i*4
-        ind1 = ind+(j-1)*4
-        invAn(ind,ind) = invB0;
-    end
+for j = 1:n
+    for i = 1:(n+1-j)
+        ind = ((i-1)*4+1):i*4;
+        invAn(ind+4*(j-1),ind) = (-1)^(j-2)*invB0*C^(j-1);
+        
+    end 
 end
-size(invAn)
+si = sym('s',[n 1]);
+s = [0,0,si(1),0];
+for i = 2:n
+ s = [s,0,0,si(i),0];
+end
+S = diag(s);
+Sx = invAn*S*transpose(invAn)
