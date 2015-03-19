@@ -1,11 +1,14 @@
-ca = 
+ca = 2;
+cw = 1;
+hwa = 1;
+hwin = 0;
 A0 = diag([cw,ca]);
 A1 = [hwa, -hwa; -hwa, hwa+hwin];
 Z = zeros(2,2);
 Z2 = zeros(4,4);
 B0 = [ A0+A1, Z; -A0, A0];
 B1 = [Z,-A0; Z Z];
-n = 3;
+n = 2;
 An = [B0 zeros(4,4*(n-1));
     zeros(4*(n-1),4*(n))];
 for i = 1:(n-1)
@@ -29,10 +32,14 @@ for j = 1:n
         
     end 
 end
-si = sym('s',[n 1]);
-s = [0,0,si(1),0];
-for i = 2:n
- s = [s,0,0,si(i),0];
-end
-S = diag(s);
-Sx = invAn*S*transpose(invAn)
+x0 = [25,20];
+b0 = [x0*A0,0,0].';
+b = [0,0,1.0,0].';
+% si = sym('s',[n 1]);
+% s = [0,0,si(1),0];
+% for i = 2:n
+%  s = [s,0,0,si(i),0];
+% end
+% S = diag(s);
+% Sx = invAn*S*transpose(invAn)
+x = inv(An)*([b;b]+[b0;0*b0])

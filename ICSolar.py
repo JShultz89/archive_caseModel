@@ -108,7 +108,11 @@ def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,hwa):
 
 	# Start the problem with solvable blocks, which
 	# are all the blocks except the first two
-	ICSolar = p.Problem(air[1::]+water[1::])
+	bToSolve = []
+	for i in range(0,2*n):				
+		bToSolve.append(water[i+1])
+		bToSolve.append(air[i+1])
+	ICSolar = p.Problem(bToSolve)
 	ICSolar.solve()
 
 	Temp = {}
@@ -148,12 +152,9 @@ if __name__ == "__main__":
 	cw = csv.DictWriter(csvwrite,csvHeader)
 	cw.writeheader()
 	# for each line, run the data
-	print data.keys()
 	numDataPoints = len(data['Timestamp'])
 	for i in range(0,numDataPoints):
-		airTemp = 22.5
-		if('Tamb' in data.keys()): 
-			airTemp = data['Tamb'][i]
+		airTemp = data['Tamb'][i]
 		heatGen = [data['heatgen_m'+str(j)][i] for j in range(1,7)]
 		waterTemp = data['exp_inlet'][i]
 		waterFlowRate = data['exp_flowrate'][i]

@@ -42,6 +42,13 @@ airVapor = \
 	'CpVapor': lambda state = 0 : 1.864,
 	'hVap': lambda state = 0: 2260 #kJ/kg
 }
+test = \
+{
+	'name':'test',
+	'type':'test',
+	'Cp': lambda state = 0 : 1.0,
+	'rho': lambda state = 0: 1.0
+}
 constWater = \
 {
 	'name':'constWater',

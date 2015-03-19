@@ -42,16 +42,17 @@ def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,heatGenVar):
 	""" Boundary flux blocks """
 	""" All these blocks remain constant """
 	# define inlet water with initial state
+	waterTemp = 25.0;
+	airTemp = 20.0;
 	w0 = b.Block('waterInlet','constWater',T = waterTemp)
-
 	# define inlet air with initial state
 	a0 = b.Block('airInlet','constAir',T = airTemp)
 
 	# We will need mass flow rates for our fluxes, so initialize them here
 	# These are added to the class object, and are not part of the
 	# default block requirement
-	w0.mdot = lambda T = 0 : waterFlowRate*1.0e-6*w0.m['rho'](w0.state)
-	a0.mdot = lambda T = 0 : 2.0*a0.m['rho'](a0.state)*0.16
+	w0.mdot = lambda T = 0 : 1.0#waterFlowRate*1.0e-6*w0.m['rho'](w0.state)
+	a0.mdot = lambda T = 0 : 2.0#2.0*a0.m['rho'](a0.state)*0.16
 
 	# All these boundary blocks need are temperatures
 	# define Exterior boundary condition
@@ -67,31 +68,31 @@ def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,heatGenVar):
 	# These blocks are not used in the solve
 	water.append(w0)
 	air.append(a0)
-	L = 0.3
+	L = 1.0
 	#### Initialize the blocks we will solve on
 	for i in range(1,2*n+1):
 		if(i % 2 == 1): # odd regions are "tube" regions
-			hh = 2.0
+			hh = 1.0
 			# Every block is named for its material in this case
-			water.append(b.Block('m' + str(n-i/2)+'_in','constWater',T = waterTemp))
-			air.append(b.Block('air' + str(n-i/2)+'_in','constAir',T = airTemp))
+			water.append(b.Block('m' + str(n-i/2)+'_in','test',T = waterTemp))
+			air.append(b.Block('air' + str(n-i/2)+'_in','test',T = airTemp))
 			# Water tube has one flux for heat conduction
 			if( i == 1 ): 
-				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':L/2.0,'scale':hh}))
+				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'test','m':[],'L':L/2.0,'scale':hh*2.0}))
 				# Air has three, corresponding to the windows and the water-tube
-				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':L/2.0,'scale':hh}))
-				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':L/2.0}))
-				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':L/2.0}))
+				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'test','m':[],'L':L/2.0,'scale':hh*2.0}))
+				# air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':L/2.0}))
+				# air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':L/2.0}))
 			else:
-				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':L,'scale':hh}))
-				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':L,'scale':hh}))
-				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':L}))
-				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':L}))
+				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'test','m':[],'L':L,'scale':hh}))
+				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'test','m':[],'L':L,'scale':hh}))
+				# air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':L}))
+				# air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':L}))
 		else: # These are "module" region
 			# Every block is named for its material in this case
-			water.append(b.Block('m' + str(n-i/2+1)+'_out','water',T = waterTemp))
-			air.append(b.Block('air' + str(n-i/2+1)+'_out','air',T = airTemp))
-			water[i].addSource(s.Source('const',T = -heatGen[n-i/2]*1e-3))
+			water.append(b.Block('m' + str(n-i/2+1)+'_out','test',T = waterTemp))
+			air.append(b.Block('air' + str(n-i/2+1)+'_out','test',T = airTemp))
+			water[i].addSource(s.Source('const',T = -1.0))#-heatGen[n-i/2]*1e-3))
 			air[i].addSource(s.Source('const',T = 0.0))
 
 		# These are the connectivity between regions, each block takes heat
@@ -108,15 +109,28 @@ def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,heatGenVar):
 
 	# Start the problem with solvable blocks, which
 	# are all the blocks except the first two
-	ICSolar = p.Problem(air[1::]+water[1::])
-	ICSolar.solve()
+	bToSolve = []
+	for i in range(0,2*n):				
+		bToSolve.append(water[i+1])
+		bToSolve.append(air[i+1])
+	ICSolar = p.Problem(bToSolve)
+	output = ICSolar.solve()
+	output = ICSolar.solve()
+
+	J = ICSolar.jacobian()
+	print J
+	# Sig = np.dot(np.linalg.inv(A),A)
+	# print np.transpose(A)
+	# print np.count_nonzero(np.abs(A > 1e-20))
+	# now we can do a test.
+
 
 	Temp = {}
 	for ww in water[1::]:
 		Temp[ww.name] = ww.state['T']
 	for aa in air[1::]:
 		Temp[aa.name] = aa.state['T']
-
+	print Temp
 	# at each point, I'm going to have	
 	return Temp
 	
@@ -136,9 +150,9 @@ if __name__ == "__main__":
 	  for (k,v) in row.items(): # go over each column name and value 
 	  	data[k].append(float(v))
 
-	numModules = 6
+	numModules = 2
 	csvHeader = ['Timestamp','exp_inlet'] 
-	for i in range(6,0,-1):
+	for i in range(numModules,0,-1):
 		csvHeader.append('m'+str(i)+'_in')
 		csvHeader.append('m'+str(i)+'_out')
 		csvHeader.append('air'+str(i)+'_in')
@@ -150,9 +164,8 @@ if __name__ == "__main__":
 	cw = csv.DictWriter(csvwrite,csvHeader)
 	cw.writeheader()
 	# for each line, run the data
-	print data.keys()
 	numDataPoints = len(data['Timestamp'])
-	for i in range(0,numDataPoints):
+	for i in range(0,numModules):
 		airTemp = 22.5
 		if('Tamb' in data.keys()): 
 			airTemp = data['Tamb'][i]
@@ -163,7 +176,7 @@ if __name__ == "__main__":
 		results['Timestamp'] = data['Timestamp'][i]
 		results['exp_inlet'] = data['exp_inlet'][i]
 
-		for j in range(1,7):
+		for j in range(1,numModules):
 			data['m'+str(j)+'_in_mod'].append(results['m'+str(j)+'_in'])
 			data['m'+str(j)+'_out_mod'].append(results['m'+str(j)+'_out'])
 			data['air'+str(j)+'_in_mod'].append(results['air'+str(j)+'_in'])

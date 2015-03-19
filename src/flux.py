@@ -79,6 +79,8 @@ class Flux(object):
 			h = 1.6124
 		elif(self.G['type'] == 'wa'):
 			h = 0.16079175187974612*self.G['scale']
+		elif(self.G['type'] == 'test'):
+			h = 1000*self.G['scale']
 		else:
 			h = 0
 		h *= self.G['L']/1000.
