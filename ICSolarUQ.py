@@ -38,12 +38,10 @@ from collections import defaultdict
 from subprocess import call
 import os.path
 from os import chdir
-def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,heatGenVar):
+def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,stddev):
 	""" Boundary flux blocks """
 	""" All these blocks remain constant """
 	# define inlet water with initial state
-	waterTemp = 25.0;
-	airTemp = 20.0;
 	w0 = b.Block('waterInlet','constWater',T = waterTemp)
 	# define inlet air with initial state
 	a0 = b.Block('airInlet','constAir',T = airTemp)
@@ -51,8 +49,8 @@ def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,heatGenVar):
 	# We will need mass flow rates for our fluxes, so initialize them here
 	# These are added to the class object, and are not part of the
 	# default block requirement
-	w0.mdot = lambda T = 0 : 1.0#waterFlowRate*1.0e-6*w0.m['rho'](w0.state)
-	a0.mdot = lambda T = 0 : 2.0#2.0*a0.m['rho'](a0.state)*0.16
+	w0.mdot = lambda T = 0 : waterFlowRate*1.0e-6*w0.m['rho'](w0.state)
+	a0.mdot = lambda T = 0 : 2.0*a0.m['rho'](a0.state)*0.16
 
 	# All these boundary blocks need are temperatures
 	# define Exterior boundary condition
@@ -68,31 +66,31 @@ def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,heatGenVar):
 	# These blocks are not used in the solve
 	water.append(w0)
 	air.append(a0)
-	L = 1.0
+	L = 0.3
 	#### Initialize the blocks we will solve on
 	for i in range(1,2*n+1):
 		if(i % 2 == 1): # odd regions are "tube" regions
-			hh = 1.0
+			hh = 2.0
 			# Every block is named for its material in this case
-			water.append(b.Block('m' + str(n-i/2)+'_in','test',T = waterTemp))
-			air.append(b.Block('air' + str(n-i/2)+'_in','test',T = airTemp))
+			water.append(b.Block('m' + str(n-i/2)+'_in','constWater',T = waterTemp))
+			air.append(b.Block('air' + str(n-i/2)+'_in','constAir',T = airTemp))
 			# Water tube has one flux for heat conduction
 			if( i == 1 ): 
-				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'test','m':[],'L':L/2.0,'scale':hh*2.0}))
+				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':L/2.0,'scale':hh}))
 				# Air has three, corresponding to the windows and the water-tube
-				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'test','m':[],'L':L/2.0,'scale':hh*2.0}))
-				# air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':L/2.0}))
-				# air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':L/2.0}))
+				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':L/2.0,'scale':hh}))
+				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':L/2.0}))
+				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':L/2.0}))
 			else:
-				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'test','m':[],'L':L,'scale':hh}))
-				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'test','m':[],'L':L,'scale':hh}))
-				# air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':L}))
-				# air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':L}))
+				water[i].addFlux(f.Flux(air[i],'heatCondSimple',{'type':'wa','m':[],'L':L,'scale':hh}))
+				air[i].addFlux(f.Flux(water[i],'heatCondSimple',{'type':'wa','m':[],'L':L,'scale':hh}))
+				air[i].addFlux(f.Flux(aInt,'heatCondSimple',{'type':'int','m':[],'L':L}))
+				air[i].addFlux(f.Flux(aExt,'heatCondSimple',{'type':'ext','m':[],'L':L}))
 		else: # These are "module" region
 			# Every block is named for its material in this case
-			water.append(b.Block('m' + str(n-i/2+1)+'_out','test',T = waterTemp))
-			air.append(b.Block('air' + str(n-i/2+1)+'_out','test',T = airTemp))
-			water[i].addSource(s.Source('const',T = -1.0))#-heatGen[n-i/2]*1e-3))
+			water.append(b.Block('m' + str(n-i/2+1)+'_out','constWater',T = waterTemp))
+			air.append(b.Block('air' + str(n-i/2+1)+'_out','constAir',T = airTemp))
+			water[i].addSource(s.Source('const',T = -heatGen*1e-3))
 			air[i].addSource(s.Source('const',T = 0.0))
 
 		# These are the connectivity between regions, each block takes heat
@@ -114,32 +112,40 @@ def solve(heatGen,waterTemp,waterFlowRate,airTemp,n,heatGenVar):
 		bToSolve.append(water[i+1])
 		bToSolve.append(air[i+1])
 	ICSolar = p.Problem(bToSolve)
-	output = ICSolar.solve()
-	output = ICSolar.solve()
+	ICSolar.solve()
+
 
 	J = ICSolar.jacobian()
-	print J
-	# Sig = np.dot(np.linalg.inv(A),A)
-	# print np.transpose(A)
-	# print np.count_nonzero(np.abs(A > 1e-20))
-	# now we can do a test.
+	invJ = np.linalg.inv(J)
+	numBlocks = len(bToSolve)
 
+
+	cov = np.zeros(numBlocks)
 
 	Temp = {}
-	for ww in water[1::]:
-		Temp[ww.name] = ww.state['T']
-	for aa in air[1::]:
-		Temp[aa.name] = aa.state['T']
-	print Temp
+	
+	for ix, (i,k) in enumerate(ICSolar.mapping):
+		if('m' in ICSolar.b[i].name and 'out' in ICSolar.b[i].name):
+			cov[ix] = stddev
+
+	sig = np.outer(np.dot(invJ,cov),np.transpose(np.dot(invJ,cov)))
+	# print ICSolar.mapping
+	# Jinv = np.linalg.inv(J)
+	for ix, (i,k) in enumerate(ICSolar.mapping):
+		Temp[ICSolar.b[i].name+'_mod'] = ICSolar.b[i].state['T']
+		Temp[ICSolar.b[i].name+'_mod_var'] = np.sqrt(sig[ix][ix])
+
+
+
+	# for ww in water[1::]:
+	# 	Temp[ww.name] = ww.state['T']
+	# for aa in air[1::]:
+	# 	Temp[aa.name] = aa.state['T']
 	# at each point, I'm going to have	
 	return Temp
 	
 if __name__ == "__main__":
 	filename = sys.argv[1]
-	if (len(sys.argv) > 2):
-		hwa = float(sys.argv[2])
-	else:
-		hwa = 2.0
 	csvfile = open(filename,'rU')
 	csvwrite = open(os.path.dirname(filename)+'/model/' + os.path.basename(filename)[:-4]+ \
 		'_model_'+'.csv','w')
@@ -150,100 +156,51 @@ if __name__ == "__main__":
 	  for (k,v) in row.items(): # go over each column name and value 
 	  	data[k].append(float(v))
 
-	numModules = 2
-	csvHeader = ['Timestamp','exp_inlet'] 
+	numModules = 6
+
+	csvHeader = data.keys()
 	for i in range(numModules,0,-1):
-		csvHeader.append('m'+str(i)+'_in')
-		csvHeader.append('m'+str(i)+'_out')
-		csvHeader.append('air'+str(i)+'_in')
-		csvHeader.append('air'+str(i)+'_out')
-		data['m'+str(i)+'_in_mod'] = [];
-		data['m'+str(i)+'_out_mod'] = [];
-		data['air'+str(i)+'_in_mod'] = [];
-		data['air'+str(i)+'_out_mod'] = [];
+		csvHeader.append('m'+str(i)+'_in_mod')
+		csvHeader.append('m'+str(i)+'_in_mod_var')
+		csvHeader.append('m'+str(i)+'_out_mod')
+		csvHeader.append('m'+str(i)+'_out_mod_var')
+
+		csvHeader.append('air'+str(i)+'_in_mod')
+		csvHeader.append('air'+str(i)+'_in_mod_var')
+		csvHeader.append('air'+str(i)+'_out_mod')
+		csvHeader.append('air'+str(i)+'_out_mod_var')
+	csvHeader.append('heatgen_mod')
+	csvHeader.append('heatgen_mod_var')
+
 	cw = csv.DictWriter(csvwrite,csvHeader)
 	cw.writeheader()
-	# for each line, run the data
-	numDataPoints = len(data['Timestamp'])
-	for i in range(0,numModules):
-		airTemp = 22.5
-		if('Tamb' in data.keys()): 
-			airTemp = data['Tamb'][i]
-		heatGen = [data['heatgen_m'+str(j)][i] for j in range(1,7)]
+
+	start = 0
+	end = len(data['DNI'])-1
+	while(data['DNI'][start] < 300):
+		start = start + 1
+	while(data['DNI'][end] < 300):
+		end = end-1
+
+
+	sampleSize = 6 # 1 minute
+	for i in range(start+sampleSize,end):
+
+		airTemp = data['Tamb'][i]
+		heatGenData = np.array(data['DNI'][(i-sampleSize+1):(i+1)])*0.024801*(1.0-0.34)
+		heatGenMean = np.mean(heatGenData)
+		heatGenSTD = np.std(heatGenData)
+		print i, heatGenMean, heatGenSTD
 		waterTemp = data['exp_inlet'][i]
 		waterFlowRate = data['exp_flowrate'][i]
-		results = solve(heatGen,waterTemp,waterFlowRate,airTemp,numModules,hwa)
-		results['Timestamp'] = data['Timestamp'][i]
-		results['exp_inlet'] = data['exp_inlet'][i]
+		
+		results = solve(heatGenMean,waterTemp,waterFlowRate,airTemp,numModules,heatGenSTD)
+		for k in data.keys():
+			results[k] = data[k][i]
+		results['heatgen_mod'] = heatGenMean
+		results['heatgen_mod_var'] = heatGenSTD
 
-		for j in range(1,numModules):
-			data['m'+str(j)+'_in_mod'].append(results['m'+str(j)+'_in'])
-			data['m'+str(j)+'_out_mod'].append(results['m'+str(j)+'_out'])
-			data['air'+str(j)+'_in_mod'].append(results['air'+str(j)+'_in'])
-			data['air'+str(j)+'_out_mod'].append(results['air'+str(j)+'_out'])
 		cw.writerow(results)
 	csvfile.close()
 	csvwrite.close()
-
-
-	# i = range(0,numDataPoints)
-	# for j in range(1,7):
-	# 	plt.plot(i,data['exp_inlet'],linewidth=2.0,label='Inlet')
-	# 	if('m'+str(j)+'_out' in data.keys()): 
-	# 		plt.plot(i,data['m'+str(j)+'_out'],linewidth=2.0,label='Expt')
-	# 	plt.plot(i,data['m'+str(j)+'_out_mod'],linewidth=2.0,label='Model')
-	# 	plt.legend(loc=0)
-	# 	plt.xlabel('Measurement number (~time)')
-	# 	plt.ylabel('Temperature (C)')
-	# 	plt.title(filename[:-4]+' m'+str(j)+'_out')
-	# 	fig = plt.gcf()
-	# 	fig.set_size_inches(4,4)
-
-	# 	plt.savefig(os.path.dirname(filename)+'/images/' + os.path.basename(filename)[:-4]+'_m'+str(j)+'_out.pdf')		
-	# 	plt.close()
-
-	# 	plt.plot(i,data['exp_inlet'],linewidth=2.0,label='Inlet')
-	# 	if('m'+str(j)+'_in' in data.keys()): 
-	# 		plt.plot(i,data['m'+str(j)+'_in'],linewidth=2.0,label='Expt')
-	# 	plt.plot(i,data['m'+str(j)+'_in_mod'],linewidth=2.0,label='Model')
-
-	# 	plt.legend(loc=0)
-	# 	plt.xlabel('Measurement number (~time)')
-	# 	plt.ylabel('Temperature (C)')
-	# 	plt.title(filename[:-4]+' m'+str(j)+'_in')
-	# 	fig = plt.gcf()
-	# 	fig.set_size_inches(4,4)
-	# 	plt.savefig(os.path.dirname(filename)+'/images/' + os.path.basename(filename)[:-4]+'_m'+str(j)+'_in.pdf')
-	# 	plt.close()
-
-	# 	# lets do this manually
-	# chdir('doc/ICSolar')
-	# texfilename = 'Steady_'+os.path.basename(filename)[:-4]+'.tex'
-	# texfile = open(texfilename,'w')
-	# header = ['\documentclass{article}',
-	# '\\usepackage[top=50pt, bottom=50pt, left=60pt, right=60pt]{geometry}',
-	# '\\usepackage{graphicx}', 
-	# '\\usepackage[bottom]{footmisc}',
-	# '\\usepackage{enumerate,verbatim}',
-	# '\\usepackage{amssymb,amsmath,ulem,amsthm}',
-	# '\\usepackage{transparent,float}']
-
-	# for item in header:
-	# 	texfile.write(item+'\n')
-	# texfile.write('\\begin{document}\n')
-	# for i in range(6,0,-1):
-	# 	texfile.write('\\begin{figure}[!ht]\n')
-	# 	texfile.write('\\centering\n')
-	# 	texfile.write('\\includegraphics[width=0.4\\textwidth]{../../'+\
-	# 		os.path.dirname(filename)+'/'+'images/' + os.path.basename(filename)[:-4]+'_m'+str(i)+\
-	# 		'_in.pdf}\hspace{0.05\\textwidth}\n')
-	# 	texfile.write('\\includegraphics[width=0.4\\textwidth]{../../'+\
-	# 		os.path.dirname(filename)+'/'+'images/' + os.path.basename(filename)[:-4]+'_m'+str(i)+\
-	# 		'_out.pdf}\hspace{0.05\\textwidth}\\\\\n')
-	# 	texfile.write('\\caption{'+'Results for Module '+str(i)+'.}')	              
-	# 	texfile.write('\\end{figure}\n')
-	# 	if(i == 5 or i == 3):
-	# 		texfile.write('\\clearpage\n')    
-	# texfile.write('\end{document}\n')
-	# texfile.close()
-	# call('pdflatex '+texfilename+'>/dev/null',shell=True)
+	# 	

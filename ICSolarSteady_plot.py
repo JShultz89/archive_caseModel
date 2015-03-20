@@ -14,16 +14,16 @@ if __name__ == "__main__":
 	# hlist = [2.0]
 	# h = float(2.0)
 	ext = ''
-	for name in basenames:
-		# for h in hlist:
-			# print name, h
-		call('python '+'ICSolar.py data/ICSolar/'+name+'.csv >/dev/null',shell=True)
+	# for name in basenames:
+	# 	# for h in hlist:
+	# 		# print name, h
+	# 	call('python '+'ICSolar.py data/ICSolar/'+name+'.csv >/dev/null',shell=True)
 
 	os.chdir('data/ICSolar')
-	normfile = open('Steady_norms.txt','w')
+	# normfile = open('Steady_norms.txt','w')
 
 	for name in basenames:
-		normfile.write(name+'\n')
+		# normfile.write(name+'\n')
 		# for h in hlist:
 		# h = float(h)
 		expt = open(name+'.csv','rU')
@@ -39,118 +39,126 @@ if __name__ == "__main__":
 		# need to align the times
 		numPoints = len(data['exp']['Timestamp'])
 		t = np.arange(0,numPoints)*10.0
+		for key in data['exp'].keys():
+			if ('dni' in key.lower()):
+				dni = key
+		print len(data['exp'][dni]), name, dni
+		q = np.array(data['exp']['exp_heatgen']);
+		plt.plot(t,data['exp'][dni],linewidth=2.0,label='dni')
+		plt.plot(t,q*10.0,linewidth=2.0,label='Q')
+		plt.legend(loc=0)
 
-		plt.plot(t,data['exp']['exp_flowrate'],linewidth=2.0)
 		plt.xlabel('Time (seconds)')
-		plt.ylabel('Volumetric Flow Rate (mm^3/s)')
+		plt.ylabel('DNI (W/m^2),Q')
 		fig = plt.gcf()
 		fig.set_size_inches(5,5)
 		axes = plt.gca()
-		plt.savefig('../../images/ICSolar/' + name+'_flowrate.png')		
+		plt.savefig('../../images/ICSolar/' + name+'_DNI.png')		
 		plt.close()
-		for j in range(6,0,-1):
-			plt.plot(t,data['exp']['heatgen_m'+str(j)],linewidth=2.0,label=str(j))
+		# for j in range(6,0,-1):
+
+		plt.plot(t,data['exp']['exp_heatgen'],linewidth=2.0)
 		plt.xlabel('Time (seconds)')
 		plt.ylabel('Q_i')
-		plt.legend(loc=0)
+		# plt.legend(loc=0)
 
 		fig = plt.gcf()
 		fig.set_size_inches(5,5)
 		plt.savefig('../../images/ICSolar/' + name+'_Q.png')		
 		plt.close()
 
-		for j in range(6,0,-1):
-			plt.plot(t,data['exp']['m'+str(j)+'_in'],linewidth=2.0,label='Expt')
-			plt.plot(t,data['st']['m'+str(j)+'_in'],linewidth=2.0,label='Model')
-			plt.plot(t,data['exp']['exp_inlet'],linewidth=2.0,label='Inlet')
+	# 	for j in range(6,0,-1):
+	# 		plt.plot(t,data['exp']['m'+str(j)+'_in'],linewidth=2.0,label='Expt')
+	# 		plt.plot(t,data['st']['m'+str(j)+'_in'],linewidth=2.0,label='Model')
+	# 		plt.plot(t,data['exp']['exp_inlet'],linewidth=2.0,label='Inlet')
 
-			plt.legend(loc=0)
-			plt.xlabel('Time (seconds)')
-			plt.ylabel('Temperature (C)')
-			plt.title('m'+str(j)+'_in ')
-			fig = plt.gcf()
-			fig.set_size_inches(5,5)
-			axes = plt.gca()
-			axes.set_ylim([20,100])
-			plt.savefig('../../images/ICSolar/' + name+'_m'+str(j)+'_in_steady_'+ext+'.png')		
-			plt.close()
+	# 		plt.legend(loc=0)
+	# 		plt.xlabel('Time (seconds)')
+	# 		plt.ylabel('Temperature (C)')
+	# 		plt.title('m'+str(j)+'_in ')
+	# 		fig = plt.gcf()
+	# 		fig.set_size_inches(5,5)
+	# 		axes = plt.gca()
+	# 		axes.set_ylim([20,100])
+	# 		plt.savefig('../../images/ICSolar/' + name+'_m'+str(j)+'_in_steady_'+ext+'.png')		
+	# 		plt.close()
 
-			plt.plot(t,data['exp']['m'+str(j)+'_out'],linewidth=2.0,label='Expt')
-			plt.plot(t,data['st']['m'+str(j)+'_out'],linewidth=2.0,label='Model')
-			plt.plot(t,data['exp']['exp_inlet'],linewidth=2.0,label='Inlet')
-			if(j == 1):
-				L2 = sum([(data['exp']['m'+str(j)+'_out'][i]-data['st']['m'+str(j)+'_out'][i])*(data['exp']['m'+str(j)+'_out'][i]-data['st']['m'+str(j)+'_out'][i])
-				 for i in range(0,numPoints)])
-				L2 = math.sqrt(L2/numPoints)
-				Linf = max([abs(data['exp']['m'+str(j)+'_out'][i]-data['st']['m'+str(j)+'_out'][i]) for i in range(0,numPoints)])
-				normfile.write(str(j) + " L2 "+ str(L2)+" Linf "+str(Linf)+'\n')
-			plt.legend(loc=0)
-			plt.xlabel('Time (seconds)')
-			plt.ylabel('Temperature (C)')
-			plt.title('m'+str(j)+'_out ')
-			fig = plt.gcf()
-			fig.set_size_inches(5,5)
-			axes = plt.gca()
-			axes.set_ylim([20,100])
-			plt.savefig('../../images/ICSolar/' + name+'_m'+str(j)+'_out_steady_'+ext+'.png')
-			plt.close()
+	# 		plt.plot(t,data['exp']['m'+str(j)+'_out'],linewidth=2.0,label='Expt')
+	# 		plt.plot(t,data['st']['m'+str(j)+'_out'],linewidth=2.0,label='Model')
+	# 		plt.plot(t,data['exp']['exp_inlet'],linewidth=2.0,label='Inlet')
+	# 		if(j == 1):
+	# 			L2 = sum([(data['exp']['m'+str(j)+'_out'][i]-data['st']['m'+str(j)+'_out'][i])*(data['exp']['m'+str(j)+'_out'][i]-data['st']['m'+str(j)+'_out'][i])
+	# 			 for i in range(0,numPoints)])
+	# 			L2 = math.sqrt(L2/numPoints)
+	# 			Linf = max([abs(data['exp']['m'+str(j)+'_out'][i]-data['st']['m'+str(j)+'_out'][i]) for i in range(0,numPoints)])
+	# 			normfile.write(str(j) + " L2 "+ str(L2)+" Linf "+str(Linf)+'\n')
+	# 		plt.legend(loc=0)
+	# 		plt.xlabel('Time (seconds)')
+	# 		plt.ylabel('Temperature (C)')
+	# 		plt.title('m'+str(j)+'_out ')
+	# 		fig = plt.gcf()
+	# 		fig.set_size_inches(5,5)
+	# 		axes = plt.gca()
+	# 		axes.set_ylim([20,100])
+	# 		plt.savefig('../../images/ICSolar/' + name+'_m'+str(j)+'_out_steady_'+ext+'.png')
+	# 		plt.close()
 
 
-			# AIR TIME
-			# plt.plot(t,data['exp']['air'+str(j)+'_in'],linewidth=2.0,label='Expt')
-			plt.plot(t,data['st']['air'+str(j)+'_in'],linewidth=2.0,label='Model')
-			plt.plot(t,data['exp']['Tamb'],linewidth=2.0,label='Ambient')
+	# 		# AIR TIME
+	# 		# plt.plot(t,data['exp']['air'+str(j)+'_in'],linewidth=2.0,label='Expt')
+	# 		plt.plot(t,data['st']['air'+str(j)+'_in'],linewidth=2.0,label='Model')
+	# 		plt.plot(t,data['exp']['Tamb'],linewidth=2.0,label='Ambient')
 
-			plt.legend(loc=0)
-			plt.xlabel('Time (seconds)')
-			plt.ylabel('Temperature (C)')
-			plt.title('air'+str(j)+'_in ')
-			fig = plt.gcf()
-			fig.set_size_inches(5,5)
-			axes = plt.gca()
-			axes.set_ylim([20,30])
-			plt.savefig('../../images/ICSolar/' + name+'_air'+str(j)+'_in_steady_'+ext+'.png')		
-			plt.close()
+	# 		plt.legend(loc=0)
+	# 		plt.xlabel('Time (seconds)')
+	# 		plt.ylabel('Temperature (C)')
+	# 		plt.title('air'+str(j)+'_in ')
+	# 		fig = plt.gcf()
+	# 		fig.set_size_inches(5,5)
+	# 		axes = plt.gca()
+	# 		axes.set_ylim([20,30])
+	# 		plt.savefig('../../images/ICSolar/' + name+'_air'+str(j)+'_in_steady_'+ext+'.png')		
+	# 		plt.close()
 
-			# plt.plot(t,data['exp']['air'+str(j)+'_out'],linewidth=2.0,label='Expt')
-			plt.plot(t,data['st']['air'+str(j)+'_out'],linewidth=2.0,label='Model')
-			plt.plot(t,data['exp']['Tamb'],linewidth=2.0,label='Ambient')
+	# 		# plt.plot(t,data['exp']['air'+str(j)+'_out'],linewidth=2.0,label='Expt')
+	# 		plt.plot(t,data['st']['air'+str(j)+'_out'],linewidth=2.0,label='Model')
+	# 		plt.plot(t,data['exp']['Tamb'],linewidth=2.0,label='Ambient')
 
-			plt.legend(loc=0)
-			plt.xlabel('Time (seconds)')
-			plt.ylabel('Temperature (C)')
-			plt.title('m'+str(j)+'_out ')
-			fig = plt.gcf()
-			fig.set_size_inches(5,5)
-			axes = plt.gca()
-			axes.set_ylim([20,30])
-			plt.savefig('../../images/ICSolar/' + name+'_air'+str(j)+'_out_steady_'+ext+'.png')
-			plt.close()
+	# 		plt.legend(loc=0)
+	# 		plt.xlabel('Time (seconds)')
+	# 		plt.ylabel('Temperature (C)')
+	# 		plt.title('m'+str(j)+'_out ')
+	# 		fig = plt.gcf()
+	# 		fig.set_size_inches(5,5)
+	# 		axes = plt.gca()
+	# 		axes.set_ylim([20,30])
+	# 		plt.savefig('../../images/ICSolar/' + name+'_air'+str(j)+'_out_steady_'+ext+'.png')
+	# 		plt.close()
 
-			# lets do this manually
-		os.chdir('../../_posts/')
-		mdfilename = time.strftime("%Y-%m-%d")+'-Steady_'+name+'_'+ext+'.md'
-		mdfile = open(mdfilename,'w')
-		header = ['---','layout: post','title: Air and Water Results on '+name,
-			'---', '{{ page.title }}','-----------------']
+	# 		# lets do this manually
+	# 	os.chdir('../../_posts/')
+	# 	mdfilename = time.strftime("%Y-%m-%d")+'-Steady_'+name+'_'+ext+'.md'
+	# 	mdfile = open(mdfilename,'w')
+	# 	header = ['---','layout: post','title: Air and Water Results on '+name,
+	# 		'---', '{{ page.title }}','-----------------']
 
-		for item in header:
-			mdfile.write(item+'\n')
-		mdfile.write('\n')
-		mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
-				name+'_flowrate.png) ')
-		mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
-				name+'_Q.png)\n\n')
-		for i in range(6,0,-1):
-			mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
-				name+'_m'+str(i)+'_in_steady_'+ext+'.png) ')
-			mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
-				name+'_m'+str(i)+'_out_steady_'+ext+'.png)\n\n')
-			mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
-				name+'_air'+str(i)+'_in_steady_'+ext+'.png) ')
-			mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
-				name+'_air'+str(i)+'_out_steady_'+ext+'.png)\n\n')
+	# 	for item in header:
+	# 		mdfile.write(item+'\n')
+	# 	mdfile.write('\n')
+	# 	mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
+	# 			name+'_flowrate.png) ')
+	# 	mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
+	# 			name+'_Q.png)\n\n')
+	# 	for i in range(6,0,-1):
+	# 		mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
+	# 			name+'_m'+str(i)+'_in_steady_'+ext+'.png) ')
+	# 		mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
+	# 			name+'_m'+str(i)+'_out_steady_'+ext+'.png)\n\n')
+	# 		mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
+	# 			name+'_air'+str(i)+'_in_steady_'+ext+'.png) ')
+	# 		mdfile.write('![Results]({{ site.baseurl }}/images/ICSolar/' + \
+	# 			name+'_air'+str(i)+'_out_steady_'+ext+'.png)\n\n')
 
-		mdfile.close()
-		os.chdir('../data/ICSolar')
-	normfile.close()
+	# 	mdfile.close()
+	# 	os.chdir('../data/ICSolar')
+	# normfile.close()
