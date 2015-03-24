@@ -159,7 +159,7 @@ if __name__ == "__main__":
 	filename = sys.argv[1]
 	csvfile = open(filename,'rU')
 	csvwrite = open(os.path.dirname(filename)+'/model/' + os.path.basename(filename)[:-4]+ \
-		'_model_'+'.csv','w')
+		'_model_UQ2'+'.csv','w')
 	cr = csv.DictReader(csvfile)
 	# read in all the data
 	data = defaultdict(list) 
@@ -188,9 +188,9 @@ if __name__ == "__main__":
 
 	start = 0
 	end = len(data['DNI'])-1
-	while(data['DNI'][start] < 300):
+	while(data['DNI'][start] < 100):
 		start = start + 1
-	while(data['DNI'][end] < 300):
+	while(data['DNI'][end] < 100):
 		end = end-1
 
 	end = end - 20
@@ -207,8 +207,10 @@ if __name__ == "__main__":
 
 		# heatGenMean = np.mean(heatGenData)
 		# heatGenSTD = np.std(heatGenData)
-		heatGenMean = np.exp(1.13346325416)*exp(0.0045503386885*data['DNI'][i])*1e-3
-		heatGenSTD = 19.386912499*1e-3
+# p = [1.11722958e-6,-1.18376465e-3,4.34784474e-1,-3.7253707e1]
+		pol = [1.67600635e-4,-5.45860e-3,-5.0490048]
+		heatGenMean = np.polyval(pol,data['DNI'][i])*1e-3/6.0
+		heatGenSTD = 19.29524*1e-3/6.0
 		# print i, heatGenMean, heatGenSTD
 		waterTemp = data['exp_inlet'][i]
 		waterFlowRate = data['exp_flowrate'][i]
